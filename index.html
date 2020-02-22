@@ -211,41 +211,59 @@
     jQuery(document).ready(function ($) {
 
       const HS_NEW_BOX = 'HS_NEW_BOX';
-      const AS_NEW_BOX = 'AS_NEW_BOX';
-      const AD_NEW_BOX = 'AD_NEW_BOX';
       const HS_BOX_ADD = 'HS_BOX_ADD';
       const HS_BOX_EDIT = 'HS_BOX_EDIT';
       const HS_BOX_ACTIVE = 'HS_BOX_ACTIVE';
 
-      const hs_new_box = (text) => ({type:HS_NEW_BOX, text: text});
-      const as_new_box = (text) => ({type:AS_NEW_BOX, text: text});
-      const ad_new_box = (text) => ({type:AD_NEW_BOX, text: text});
+      const AS_NEW_BOX = 'AS_NEW_BOX';
+      const AS_BOX_EDIT = 'AS_BOX_EDIT';
+      const AS_SELECT = 'AS_SELECT';
+
+      const AD_NEW_BOX = 'AD_NEW_BOX';
+      const AD_BOX_EDIT = 'AD_BOX_EDIT';
+
+
+      const hs_new_box = (text, prev_box_id) => ({type:HS_NEW_BOX, text: text, prev_box_id: prev_box_id});
       const hs_box_add = (text, box_id) => ({type:HS_BOX_ADD, text: text, box_id:box_id});
       const hs_box_edit = (text, box_id, idx) => ({type:HS_BOX_EDIT, text: text, box_id:box_id, idx: idx});
       const hs_box_active = (box_id, idx) => ({type:HS_BOX_ACTIVE, box_id:box_id, idx: idx});
 
+      const as_new_box = (text, prev_box_id) => ({type:AS_NEW_BOX, text: text, prev_box_id: prev_box_id});
+      const as_box_edit = (box_id, text) => ({type:AS_BOX_EDIT, text: text, box_id:box_id});
+      const as_select = (box_id, prev_box_id) => ({type:AS_SELECT, box_id: box_id, prev_box_id:prev_box_id});
+
+      const ad_new_box = (text1, text2, prev_box_id) => ({type:AD_NEW_BOX, text: [text1, text2], prev_box_id: prev_box_id});
+      const ad_box_edit = (box_id, text1, text2) => ({type: AD_BOX_EDIT, text: [text1, text2]});
+
       const initialState = {
-        number: 0,
         boxes:[],
-        as:[],
         ad:[
           {
+            isSub: true,
             main:'light',
-            sub: ['light on', 'light off']
+            sub: [
+                { content:'light on', next:0 },
+                { content:'light off', next:0 }
+              ]
           }, 
           {
+            isSub: false,
             main: 'music streaming',
-            sub: []
           }
         ],
       };
 
       const counter = (state = initialState, action) => {
+
+        let box_id = state.boxes.length + 1;
+
         switch(action.type) {
+
           case HS_NEW_BOX:
+
             state.boxes.push(
               {
-                id: state.boxes.length + 1, 
+                id: box_id, 
                 action: 'hs',
                 active: 0,
                 cases:[
@@ -255,20 +273,91 @@
                   }
                 ]
               });
+
+            if(box_id - 1){
+                state.boxes[action.prev_box_id - 1].next = box_id;
+            }
+
             return state;
+
           case HS_BOX_ADD:
+
             state.boxes[action.box_id - 1].cases.push(
               {
                 content: action.text,
                 next: 0
               });
+
             return state;
+
           case HS_BOX_EDIT:
+
             state.boxes[action.box_id - 1].cases[action.idx].content = action.text;
+
             return state;
+
           case HS_BOX_ACTIVE:
+
             state.boxes[action.box_id - 1].active = action.idx;
+
             return state;
+
+          case AS_NEW_BOX:
+            state.boxes.push(
+              {
+                id: box_id, 
+                action: 'as',
+                content: action.text,
+                next: 0
+              });
+            if(box_id - 1){
+              if(state.boxes[action.prev_box_id - 1].action == 'hs'){
+                let active = state.boxes[action.prev_box_id - 1].active;
+                state.boxes[action.prev_box_id - 1].cases[active].next = box_id;
+              }else{
+
+              }
+            }
+            return state;
+
+          case AS_BOX_EDIT:
+
+            state.boxes[action.box_id - 1].content = action.text;
+            return state;
+
+          case AS_SELECT:
+            if(state.boxes[action.prev_box_id - 1].action == 'hs'){
+              let active = state.boxes[action.prev_box_id - 1].active;
+              state.boxes[action.prev_box_id - 1].cases[active].next = action.box_id;
+            }else{
+
+            }
+            return state;
+
+          case AD_NEW_BOX:
+            state.boxes.push(
+              {
+                id: box_id, 
+                action: 'ad',
+                content: action.text,
+                next: 0
+              });
+            if(box_id - 1){
+              if(state.boxes[action.prev_box_id - 1].action == 'hs'){
+                let active = state.boxes[action.prev_box_id - 1].active;
+                state.boxes[action.prev_box_id - 1].cases[active].next = box_id;
+              }else{
+                state.boxes[action.prev_box_id - 1].next = box_id;
+              }
+            }
+            return state;
+
+          case AD_BOX_EDIT:
+
+            state.boxes[action.box_id - 1].content = action.text;
+            return state;
+
+
           default:
             return state;
         }
@@ -296,7 +385,7 @@
 
       $("#create_test").click(() => alert(JSON.stringify(store.getState().boxes)));
 
-
+      let selected_input;
 
       /*******  HS ********/
 
@@ -315,7 +404,8 @@
 
         if($(this).hasClass('new-input')){ 
           if(!$(this).parent().attr('box_id')){
-            store.dispatch(hs_new_box(text));
+            let prev_box_id = $(this).parent().parent('.alexa-row').prev().find('.box').attr('box_id');
+            store.dispatch(hs_new_box(text, prev_box_id));
           }else{
             let box_id = parseInt(hs_box.attr('box_id'));
             store.dispatch(hs_box_add(text, box_id));
@@ -355,14 +445,12 @@
       $(document).on('click', '.as', function(){
         if( $('#as-dropdown').css('display') == 'none'){
           $('#as-dropdown').html('');
-          let items = store.getState().as;
+          let items = store.getState().boxes;
           alexa_contents = [];
 
           $.each(items, function (index, item){
             if(item.action == 'as'){
-              $.each(item.cases, function(index, i_case){
-                alexa_contents.push({box_id: item.id, content:i_case.content});
-              });
+                alexa_contents.push({box_id: item.id, content:item.content});
             }
           });
 
@@ -371,8 +459,6 @@
           $.each(alexa_contents, function(index, text){
             $('#as-dropdown').append('<p class="ad-item" idx="' + text.box_id + '">' + text.content + '</p>');
           });
-
-          
 
           let offset = $(this).offset();
           let dropdown = $('#as-dropdown');
@@ -383,9 +469,224 @@
         
       });
 
-      /**********AD***********/
+      $(document).click(function (e) {
+          if (!$(e.target).hasClass("dropdown") && $(e.target).parents("#as-dropdown").length === 0) 
+          {
+              $("#as-dropdown").slideUp();
+          }
+      });
 
-      /********Common********/
+      $(document).on('change', '.as', function(){
+        let text = $(this).val();
+        if($(this).hasClass('new')){
+          let prev_box_id = $(this).parent('.alexa-row').prev().find('.box').attr('box_id');
+          store.dispatch(as_new_box(text, prev_box_id));
+        }else{
+          let box_id = parseInt($(this).attr('box_id'));
+          store.dispatch(as_box_edit(box_id, text));
+        }
+        $("#as-dropdown").slideUp();
+        // $(this).blur();
+      });
+
+      $(document).on('click', '#as-dropdown p', function(e){
+
+        let box_id = $(this).attr('idx');
+        let prev_box_id = selected_input.parent('.alexa-row').prev().find('.box').attr('box_id');
+        store.dispatch(as_select(box_id, prev_box_id));
+        $("#as-dropdown").slideUp();
+
+      });
+
+      $(document).click(function (e) {
+          if (!$(e.target).hasClass("dropdown") && $(e.target).parents("#as-dropdown").length === 0) 
+          {
+              $("#as-dropdown").slideUp();
+          }
+      });
+
+
+      /*******    AD    *******/
+
+      $(document).on('click', '.ad.main', function(){
+        if( $('#ad-dropdown').css('display') == 'none'){
+
+          $('.ad-item').remove();
+          $('.ad-new-input').remove();
+
+          ad = store.getState().ad;
+
+          $.each(ad, function (index, item){
+            
+            $('.ad-new-btn').before('<div class="ad-item" idx="' + ad.indexOf(item) + '">' +
+                                    '<input readonly="readonly" value="' + item.main + '">' + 
+                                    '<div>' + 
+                                      '<!--<button class="edit">Edit</button> -->' + 
+                                      '<!--<button class="delete">Delete</button>-->' +
+                                    '</div>' +
+                                  '</div>');
+          });
+
+          let offset = $(this).offset();
+          let dropdown = $('#ad-dropdown');
+          let width = $('.alexa-box').width();
+          dropdown.animate({top: offset.top+53, left: offset.left, width: width/2}, 10, function(){ $(this).slideDown()});
+          selected_input = $(this);
+        }
+        
+      });
+
+      $(document).on('click', '.ad.sub', function(){
+        if( $('#sub-ad-dropdown').css('display') == 'none'){
+
+          $('.sub-ad-item').remove();
+          $('.sub-ad-new-input').remove();
+
+          ad = store.getState().ad;
+
+          if($(this).parent().find('.main').attr('idx') + 1){
+            let items = ad[$(this).parent().find('.main').attr('idx')].sub;
+
+            $.each(items, function (index, item){
+              
+              $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + items.indexOf(item) + '">' +
+                                      '<input readonly="readonly" value="' + item + '">' + 
+                                      '<div>' + 
+                                        '<!--<button class="edit">Edit</button> -->' + 
+                                        '<!--<button class="delete">Delete</button>-->' +
+                                      '</div>' +
+                                    '</div>');
+            });
+
+            let offset = $(this).offset();
+            let dropdown = $('#sub-ad-dropdown');
+            let width = $('.alexa-box').width();
+            dropdown.animate({top: offset.top+53, left: offset.left, width: width/2}, 10, function(){ $(this).slideDown()});
+            selected_input = $(this);
+          }
+          
+        }
+        
+      });
+
+      $(document).on('click', '.ad-new-btn', function(){
+        if(!$('.ad-new-input').length){
+           $('#ad-dropdown').prepend('<input class="ad-new-input" type="text">');
+        }
+        
+        $('.ad-new-input').focus();
+      });
+
+      $(document).on('click', '.sub-ad-new-btn', function(){
+        if(!$('.sub-ad-new-input').length){
+           $('#sub-ad-dropdown').prepend('<input class="sub-ad-new-input" type="text">');
+        }
+        
+        $('.sub-ad-new-input').focus();
+      });
+
+      $(document).on('click', '#ad-dropdown .ad-item input', function(e){
+        if($(this).attr('readonly') == 'readonly'){
+
+          ad = store.getState().ad;
+
+          let text = $(this).val();
+          let idx = $(this).parent().attr('idx');
+
+          selected_input.val(text);
+          selected_input.attr('idx', idx);
+          // selected_input.trigger('change');
+          $("#ad-dropdown").slideUp();
+
+          selected_input.parent().find('.sub').val('');
+
+          if(!ad[idx].sub.length){
+            selected_input.parent().find('.sub').val(text).trigger('change');
+          }
+        }
+      });
+
+      $(document).on('click', '#sub-ad-dropdown .sub-ad-item input', function(e){
+        if($(this).attr('readonly') == 'readonly'){
+          let text = $(this).val();
+          let idx = $(this).parent().attr('idx');
+
+          selected_input.val(text);
+          selected_input.attr('idx', idx);
+
+          $("#sub-ad-dropdown").slideUp();
+
+          selected_input.trigger('change');
+        }
+      });
+
+      $(document).on('change', '.ad-new-input', function(){
+        let txt = $(this).val();
+
+        $('.ad-new-btn').before('<div class="ad-item" idx="' + $('#ad-dropdown .ad-item').length + '">' +
+                                    '<input readonly="readonly" value="' + txt + '">' + 
+                                    '<div>' + 
+                                      '<!--<button class="edit">Edit</button>-->' + 
+                                      '<!--<button class="delete">Delete</button>-->' +
+                                    '</div>' +
+                                  '</div>');
+                                  
+        ad_contents.push({main: txt, sub: []});
+
+        $(this).remove();
+      });
+
+      $(document).on('change', '.sub-ad-new-input', function(){
+        let txt = $(this).val();
+
+        $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + $('#sub-ad-dropdown .sub-ad-item').length + '">' +
+                                    '<input readonly="readonly" value="' + txt + '">' + 
+                                    '<div>' + 
+                                      '<!--<button class="edit">Edit</button>-->' + 
+                                      '<!--<button class="delete">Delete</button>-->' +
+                                    '</div>' +
+                                  '</div>');
+        ad_contents[selected_input.parent().find('.main').attr('idx')].sub.push($(this).val());
+        $(this).remove();
+      });
+
+      $(document).click(function (e) {
+          if (!$(e.target).hasClass("dropdown") && $(e.target).parents("#ad-dropdown").length === 0) 
+          {
+              $("#ad-dropdown").slideUp();
+          }
+      });
+
+      $(document).click(function (e) {
+          if (!$(e.target).hasClass("dropdown") && $(e.target).parents("#sub-ad-dropdown").length === 0) 
+          {
+              $("#sub-ad-dropdown").slideUp();
+          }
+      });
+
+      $(document).on('change', '.ad.sub', function(){
+
+        let text1 = $(this).parent().find('.main').val();
+        let text2 = $(this).val();
+
+        if($(this).parent().hasClass('new')){
+          let prev_box_id = $(this).parent().parent('.alexa-row').prev().find('.box').attr('box_id');
+          store.dispatch(ad_new_box(text1, text2, prev_box_id));
+        }else{
+          let box_id = parseInt($(this).parent().attr('box_id'));
+          store.dispatch(ad_box_edit(box_id, text1, text2));
+        }
+      });
+
+      $(document).on('click', '.ad-new-btn', function(){
+        if(!$('.ad-new-input').length){
+           $('#ad-dropdown').prepend('<input class="ad-new-input" type="text">');
+        }
+        
+        $('.ad-new-input').focus();
+      });
+
+      /******   Common  ******/
       function newRow(id, action){
         let row = '';
         let id_input = '<input class="row-id" type="text" value="' + id + '" disabled>';
@@ -434,7 +735,7 @@
             box_id = box.cases[active].next;
           }else{
             let text = box.content;
-            createRow(row_id, box_id, action, text);
+            createRow(row_id, box_id, box, action, text);
             box_id = box.next;
           }
           
