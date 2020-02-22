@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Alexa Skill</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  
+  <!-- Bootstrap CSS File -->
+  <link href="./bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    .alexa-body{
+      background: #334453;
+    }
+    .alexa-header{
+      height: 70px;
+      padding-top: 12px;
+      color: #fff;
+      font-size: 30px;
+    }
+    .alexa-header .alexa-box{
+      color: #fff;
+    }
+    .alexa-footer{
+      height: 70px;
+      padding-top: 15px;
+    }
+    .alexa-section{
+      height: calc(100vh - 160px);
+      min-height: calc(100vh - 240px);
+      background: #202a34;
+      overflow-y: auto;
+      /*position: relative;*/
+    }
+
+    .alexa-row{
+      display: flex;
+      justify-content: space-around;
+      margin: 10px 0;
+    }
+
+    .row-id{
+      width: 50px;
+      height: 50px;
+      text-align: center;
+      background: #324255;
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      text-align: center;
+    }
+
+    .alexa-box, .hs-box input{
+      width: 27%;
+      height: 50px;
+      border: none;
+      border-radius: 4px;
+      padding-left: 10px;
+      color: #ffffff;
+    }
+    .hs-box{
+    	width: 27%;
+    }
+    .hs-box input{
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .hs-box input{
+      background: #024242;
+    }
+
+    .as, .ad, .hs-box input.active{
+      background: #5384ff;
+    }
+    
+    #hs-dropdown, #as-dropdown, #ad-dropdown, #sub-ad-dropdown{
+      display: none;
+      width: 28%;
+      background: #8492af;
+      position: absolute;
+      /*border: 1px solid #000;*/
+      border-radius: 3px;
+      padding: 10px 5px;
+      box-shadow: 5px 5px 10px;
+    }
+    #as-dropdown p, #ad-dropdown p, #sub-ad-dropdown p, #hs-dropdown p{
+      margin: 0;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    #as-dropdown p:hover, #ad-dropdown p:hover,#sub-ad-dropdown p:hover, #hs-dropdown p:hover{
+      background: #65a8fe;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    input{
+      outline: none;
+    }
+
+    .add-input {
+      background: transparent;
+      border: 0;
+      
+      border-bottom: 1px solid #334453;
+      margin-left: 10px;
+    }
+    #hs-items, #as-items, #ad-items{
+      /*border-bottom: 1px solid #000;*/
+    }
+    .hs-item, .as-item, .ad-item, .sub-ad-item{
+      padding: 2px 0;
+      position: relative;
+    }
+    .drop-close{
+      float: right;
+    }
+    .human-delete{
+      position: absolute;
+      right: 0;
+    }
+
+    .hs-item:hover{
+      background: #d7d7d7;
+    }
+    .hs-item{
+      display: flex;
+      justify-content: space-between;
+    }
+    .hs-item button{
+      border: none;
+      background: none;
+      outline: none;
+    }
+    .hs-item button:hover{
+      color: red;
+      cursor: pointer;
+    }
+    .hs-item .edit{
+      color: green;
+    }
+    .hs-item .delete{
+      color: blue;
+    }
+    #hs-dropdown input{
+      background: none;
+      outline: none;
+      border: none;
+    }
+    .ad.alexa-box{
+      width: 40%;
+      margin-right: 5px;
+    }
+    .ad-item input, .ad-new-input, .sub-ad-item input, .sub-ad-new-input{
+      width: 100%;
+    }
+
+    
+  </style>
+</head>
+
+<body class = "alexa-body">
+
+  <div class="">
+
+    <header class="alexa-header">
+
+      <div class="alexa-row">
+        <div class="row-id" style="visibility: hidden;"></div>
+        <div class="alexa-box">Human says:</div>
+        <div class="alexa-box">Alexa says:</div>
+        <div class="alexa-box">Alexa does:</div>
+      </div>
+
+    </header>
+
+    <section class="alexa-section">
+
+      <div id="as-dropdown" class="dropdown">
+      </div>
+
+      <div id="ad-dropdown" class="dropdown">
+        <p class="ad-new-btn"> + Add New </p>
+      </div>
+
+      <div id="sub-ad-dropdown" class="dropdown">
+        <p class="sub-ad-new-btn"> + Add New </p>
+      </div>
+
+    </section>
+
+    <footer class="alexa-footer">
+
+      <div class="row">
+        <div class="col-8"></div>
+        <div class="col-4 ">
+          <button id="create_test" class="btn btn-primary btn-lg" style="">Create and Test Skill</button>
+        </div>
+      </div>
+
+    </footer>
+    
+  </div>
+
+  <!-- JavaScript Libraries -->
+  <script src="./jquery.min.js"></script>
+  <script src="./redux.js"></script>
+  
+  <script>
+    jQuery(document).ready(function ($) {
+
+      const HS_NEW_BOX = 'HS_NEW_BOX';
+      const AS_NEW_BOX = 'AS_NEW_BOX';
+      const AD_NEW_BOX = 'AD_NEW_BOX';
+      const HS_BOX_ADD = 'HS_BOX_ADD';
+      const HS_BOX_EDIT = 'HS_BOX_EDIT';
+      const HS_BOX_ACTIVE = 'HS_BOX_ACTIVE';
+
+      const hs_new_box = (text) => ({type:HS_NEW_BOX, text: text});
+      const as_new_box = (text) => ({type:AS_NEW_BOX, text: text});
+      const ad_new_box = (text) => ({type:AD_NEW_BOX, text: text});
+      const hs_box_add = (text, box_id) => ({type:HS_BOX_ADD, text: text, box_id:box_id});
+      const hs_box_edit = (text, box_id, idx) => ({type:HS_BOX_EDIT, text: text, box_id:box_id, idx: idx});
+      const hs_box_active = (box_id, idx) => ({type:HS_BOX_ACTIVE, box_id:box_id, idx: idx});
+
+      const initialState = {
+        number: 0,
+        boxes:[],
+        as:[],
+        ad:[
+          {
+            main:'light',
+            sub: ['light on', 'light off']
+          }, 
+          {
+            main: 'music streaming',
+            sub: []
+          }
+        ],
+      };
+
+      const counter = (state = initialState, action) => {
+        switch(action.type) {
+          case HS_NEW_BOX:
+            state.boxes.push(
+              {
+                id: state.boxes.length + 1, 
+                action: 'hs',
+                active: 0,
+                cases:[
+                  {
+                    content: action.text,
+                    next: 0
+                  }
+                ]
+              });
+            return state;
+          case HS_BOX_ADD:
+            state.boxes[action.box_id - 1].cases.push(
+              {
+                content: action.text,
+                next: 0
+              });
+            return state;
+          case HS_BOX_EDIT:
+            state.boxes[action.box_id - 1].cases[action.idx].content = action.text;
+            return state;
+          case HS_BOX_ACTIVE:
+            state.boxes[action.box_id - 1].active = action.idx;
+            return state;
+          default:
+            return state;
+        }
+      }
+
+      const { createStore } = Redux;
+      const store = createStore(counter);
+
+      let boxes = [];
+
+
+      const render = () => {
+        if(!store.getState().boxes.length){
+          newRow(1,'');
+        }else{
+          $('section .alexa-row').remove();
+          boxes = store.getState().boxes;
+          showDialog();
+        }
+      }
+
+      store.subscribe(render);
+
+      render();
+
+      $("#create_test").click(() => alert(JSON.stringify(store.getState().boxes)));
+
+
+
+      /*******  HS ********/
+
+      $(document).on('click', '.add-new', function(){
+        if(!$('.new-input').length){
+          let len = $(this).parent().find('input').length;
+          $(this).before('<input type="text" class="new-input" idx="' + len + '">');
+        }
+        $('.new-input').focus();
+      });
+
+      $(document).on('change', '.hs-box input', function(){
+        
+        let text = $(this).val();
+        let hs_box = $(this).parent();
+
+        if($(this).hasClass('new-input')){ 
+          if(!$(this).parent().attr('box_id')){
+            store.dispatch(hs_new_box(text));
+          }else{
+            let box_id = parseInt(hs_box.attr('box_id'));
+            store.dispatch(hs_box_add(text, box_id));
+          }
+        }else{ 
+          let box_id = $(this).parent().attr('box_id');
+          let idx = $(this).attr('idx');
+          store.dispatch(hs_box_edit(text, box_id, idx));
+        }
+      });
+
+      
+      let clicks = 0;
+      $(document).on('click', '.hs-box input', function(e){
+        let box_id = $(this).parent().attr('box_id');
+              let idx = $(this).attr('idx') ;
+
+        clicks++;
+        if (clicks == 1) {
+          setTimeout(function(){
+            if(clicks == 1) {
+              
+              store.dispatch(hs_box_active(box_id, idx));
+            } else {
+              $(this).focus();
+            }
+            clicks = 0;
+          }, 200);
+        }
+      });
+
+      
+
+
+      /***********AS**********/
+
+      $(document).on('click', '.as', function(){
+        if( $('#as-dropdown').css('display') == 'none'){
+          $('#as-dropdown').html('');
+          let items = store.getState().as;
+          alexa_contents = [];
+
+          $.each(items, function (index, item){
+            if(item.action == 'as'){
+              $.each(item.cases, function(index, i_case){
+                alexa_contents.push({box_id: item.id, content:i_case.content});
+              });
+            }
+          });
+
+          alexa_contents = $.unique(alexa_contents);
+
+          $.each(alexa_contents, function(index, text){
+            $('#as-dropdown').append('<p class="ad-item" idx="' + text.box_id + '">' + text.content + '</p>');
+          });
+
+          
+
+          let offset = $(this).offset();
+          let dropdown = $('#as-dropdown');
+          let width = $('.alexa-box').width();
+          dropdown.animate({top: offset.top+53, left: offset.left, width: width}, 10, function(){ $(this).slideDown()});
+          selected_input = $(this);
+        }
+        
+      });
+
+      /**********AD***********/
+
+      /********Common********/
+      function newRow(id, action){
+        let row = '';
+        let id_input = '<input class="row-id" type="text" value="' + id + '" disabled>';
+        let empty_input = '<div class="alexa-box"></div>';
+        let row_start = '<div class="alexa-row" rowid="' + id + '">';
+        let row_end = '</div>';
+        let hs_input = '<div class="hs-box new box"><button class="add-new">Add New</button></div>';
+        let as_input = '<input class="as alexa-box new box" type="text" value="" idx="0">';
+        let ad_input = '<div class="alexa-box new box" idx="0"><input  readonly="readonly" class="ad alexa-box main" type="text" value=""><input  readonly="readonly" class="ad alexa-box sub" type="text" value="" idx="0"></div>';
+        if(id == 1){
+          row = row_start + id_input + hs_input + as_input + ad_input + row_end;
+        }else{
+          switch(action){
+            case 'hs':
+              row = row_start + id_input + empty_input + as_input + ad_input + row_end;
+              break;
+            case 'as':
+              row = row_start + id_input + hs_input + empty_input + ad_input + row_end;
+              break;
+            case 'ad':
+              row = row_start + id_input + hs_input + as_input + empty_input + row_end;
+              break;
+          }
+        }
+        
+        $('.alexa-section').append(row);
+        if($('.as.new').length){
+          $('.as.new').focus();
+        }else{
+          $('.hs.new').trigger('click');
+        }
+      }
+
+      function showDialog(){
+        let row_id = 1;
+        let box_id = 1;
+        let action = '';
+        while(box_id){
+          let box = boxes[box_id - 1];
+          action = box.action;
+
+          if(action == 'hs'){
+            let active = box.active;
+            let text = box.cases[active].content;
+            createRow(row_id, box_id,  box, action, text);
+            box_id = box.cases[active].next;
+          }else{
+            let text = box.content;
+            createRow(row_id, box_id, action, text);
+            box_id = box.next;
+          }
+          
+          ++ row_id;
+        }
+
+        newRow(row_id, action);
+      }
+
+      function createRow(row_id, box_id, box, action, text){
+
+        let row = '';
+        let id_input = '<input class="row-id" type="text" value="' + row_id + '" disabled>';
+        let empty_input = '<div class="alexa-box"></div>';
+        let row_start = '<div class="alexa-row" rowid="' + row_id + '">';
+        let row_end = '</div>';
+        switch(action){
+          case 'hs':
+            let items = box.cases;
+
+            let hs_box = '';
+
+            $.each(items, function (index, item){
+              if(index == box.active){
+                hs_box = hs_box + '<input type="text" class="active" idx="' + items.indexOf(item) + '" value="' + item.content + '">';
+              }else{
+                hs_box = hs_box + '<input type="text" idx="' + items.indexOf(item) + '" value="' + item.content + '">';
+              }
+              
+            });
+            hs_box = '<div class="hs-box box" box_id="' + box_id + '" content="' + text + '" idx="0">' +
+             hs_box + '<button class="add-new">Add New</button></div>';
+            row = row_start + id_input + hs_box + empty_input + empty_input + row_end;
+            break;
+          case 'as':
+            row = row_start + id_input + empty_input + '<input class="as alexa-box box" type="text" value="' + text + '" box_id="' + box_id + '"  idx="0">' + empty_input + row_end;
+            break;
+          case 'ad':
+            row = row_start + id_input + empty_input + empty_input + '<div class="alexa-box box" idx="0" ' + '" box_id="' + box_id + '"><input readonly="readonly"  class="ad alexa-box main" type="text" value="' + text[0] + '"  idx=""><input readonly="readonly"  class="ad alexa-box sub" type="text" value="' + text[1] + '" box_id="' + box_id + '"  idx="0"></div>' + row_end;
+            break;
+        }
+        $('.alexa-section').append(row);
+      }
+
+
+
+
+    });
+  </script>
+
+</body>
+</html>
