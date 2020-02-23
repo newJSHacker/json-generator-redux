@@ -366,7 +366,14 @@
               let active = state.boxes[action.prev_box_id - 1].active;
               state.boxes[action.prev_box_id - 1].cases[active].next = action.box_id;
             }else{
-
+              let prev_box = state.boxes[action.prev_box_id - 1];
+              let main = prev_box.main;
+              if(state.ad[main].isSub){
+                let sub = prev_box.sub;
+                state.ad[main].sub[sub].next = action.box_id;
+              }else{
+                state.ad[main].next = action.box_id;
+              }
             }
             return state;
 
