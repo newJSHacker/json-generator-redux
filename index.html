@@ -232,8 +232,8 @@
       const as_box_edit = (box_id, text) => ({type:AS_BOX_EDIT, text: text, box_id:box_id});
       const as_select = (box_id, prev_box_id) => ({type:AS_SELECT, box_id: box_id, prev_box_id:prev_box_id});
 
-      const ad_new_box = (text1, text2, prev_box_id) => ({type:AD_NEW_BOX, text: [text1, text2], prev_box_id: prev_box_id});
-      const ad_box_edit = (box_id, text1, text2) => ({type: AD_BOX_EDIT, text: [text1, text2]});
+      const ad_new_box = (main, sub, prev_box_id) => ({type:AD_NEW_BOX, main: main, sub: sub , prev_box_id: prev_box_id});
+      const ad_box_edit = (box_id, main, sub) => ({type: AD_BOX_EDIT, box_id: box_id, main: main, sub: sub});
 
       const initialState = {
         boxes:[],
@@ -244,6 +244,14 @@
             sub: [
                 { content:'light on', next:0 },
                 { content:'light off', next:0 }
+              ]
+          }, 
+          {
+            isSub: true,
+            main:'Color',
+            sub: [
+                { content:'White', next:0 },
+                { content:'Black', next:0 }
               ]
           }, 
           {
@@ -275,7 +283,14 @@
               });
 
             if(box_id - 1){
+              if(state.boxes[action.prev_box_id - 1].action == 'ad'){
+                let main = state.boxes[action.prev_box_id - 1].main;
+                let sub = state.boxes[action.prev_box_id - 1].sub;
+                state.ad[main].sub[sub].next = box_id;
+              }else{
                 state.boxes[action.prev_box_id - 1].next = box_id;
+              }
+                
             }
 
             return state;
@@ -315,7 +330,9 @@
                 let active = state.boxes[action.prev_box_id - 1].active;
                 state.boxes[action.prev_box_id - 1].cases[active].next = box_id;
               }else{
-
+                let main = state.boxes[action.prev_box_id - 1].main;
+                let sub = state.boxes[action.prev_box_id - 1].sub;
+                state.ad[main].sub[sub].next = box_id;
               }
             }
             return state;
@@ -339,8 +356,8 @@
               {
                 id: box_id, 
                 action: 'ad',
-                content: action.text,
-                next: 0
+                main: action.main,
+                sub: action.sub
               });
             if(box_id - 1){
               if(state.boxes[action.prev_box_id - 1].action == 'hs'){
@@ -354,7 +371,8 @@
 
           case AD_BOX_EDIT:
 
-            state.boxes[action.box_id - 1].content = action.text;
+            state.boxes[action.box_id - 1].main = action.main;
+            state.boxes[action.box_id - 1].sub = action.sub;
             return state;
 
 
@@ -383,7 +401,7 @@
 
       render();
 
-      $("#create_test").click(() => alert(JSON.stringify(store.getState().boxes)));
+      $("#create_test").click(() => alert(JSON.stringify(store.getState())));
 
       let selected_input;
 
@@ -550,7 +568,7 @@
             $.each(items, function (index, item){
               
               $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + items.indexOf(item) + '">' +
-                                      '<input readonly="readonly" value="' + item + '">' + 
+                                      '<input readonly="readonly" value="' + item.content + '">' + 
                                       '<div>' + 
                                         '<!--<button class="edit">Edit</button> -->' + 
                                         '<!--<button class="delete">Delete</button>-->' +
@@ -600,7 +618,7 @@
 
           selected_input.parent().find('.sub').val('');
 
-          if(!ad[idx].sub.length){
+          if(!ad[idx].sub){
             selected_input.parent().find('.sub').val(text).trigger('change');
           }
         }
@@ -666,15 +684,15 @@
 
       $(document).on('change', '.ad.sub', function(){
 
-        let text1 = $(this).parent().find('.main').val();
-        let text2 = $(this).val();
+        let main = $(this).parent().find('.main').attr('idx');
+        let sub = $(this).attr('idx');
 
         if($(this).parent().hasClass('new')){
           let prev_box_id = $(this).parent().parent('.alexa-row').prev().find('.box').attr('box_id');
-          store.dispatch(ad_new_box(text1, text2, prev_box_id));
+          store.dispatch(ad_new_box(main, sub, prev_box_id));
         }else{
           let box_id = parseInt($(this).parent().attr('box_id'));
-          store.dispatch(ad_box_edit(box_id, text1, text2));
+          store.dispatch(ad_box_edit(box_id, main, sub));
         }
       });
 
@@ -733,6 +751,10 @@
             let text = box.cases[active].content;
             createRow(row_id, box_id,  box, action, text);
             box_id = box.cases[active].next;
+          }else if(action == 'ad'){
+            let text = box.content;
+            createRow(row_id, box_id, box, action, text);
+            box_id = store.getState().ad[box.main].sub[box.sub].next;
           }else{
             let text = box.content;
             createRow(row_id, box_id, box, action, text);
@@ -774,7 +796,10 @@
             row = row_start + id_input + empty_input + '<input class="as alexa-box box" type="text" value="' + text + '" box_id="' + box_id + '"  idx="0">' + empty_input + row_end;
             break;
           case 'ad':
-            row = row_start + id_input + empty_input + empty_input + '<div class="alexa-box box" idx="0" ' + '" box_id="' + box_id + '"><input readonly="readonly"  class="ad alexa-box main" type="text" value="' + text[0] + '"  idx=""><input readonly="readonly"  class="ad alexa-box sub" type="text" value="' + text[1] + '" box_id="' + box_id + '"  idx="0"></div>' + row_end;
+            let ad = store.getState().ad;
+            let maintext = ad[box.main].main;
+            let subtext = ad[box.main].sub[box.sub].content;
+            row = row_start + id_input + empty_input + empty_input + '<div class="alexa-box box" idx="0" ' + '" box_id="' + box_id + '"><input readonly="readonly"  class="ad alexa-box main" type="text" value="' + maintext + '"  idx="' + box.main + '"><input readonly="readonly"  class="ad alexa-box sub" type="text" value="' + subtext + '" idx="' + box.sub + '"></div>' + row_end;
             break;
         }
         $('.alexa-section').append(row);
