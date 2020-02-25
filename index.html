@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Alexa Skill</title>
+  <title>NOIMAN</title>
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   
   <!-- Bootstrap CSS File -->
@@ -482,23 +482,23 @@
       });
 
       
-      let clicks = 0;
       $(document).on('click', '.hs-box input', function(e){
         let box_id = $(this).parent().attr('box_id');
-              let idx = $(this).attr('idx') ;
+        let idx = $(this).attr('idx');
+        let text = $(this).val().trim();
 
-        clicks++;
-        if (clicks == 1) {
-          setTimeout(function(){
-            if(clicks == 1) {
-              
-              store.dispatch(hs_box_active(box_id, idx));
-            } else {
-              $(this).focus();
-            }
-            clicks = 0;
-          }, 200);
+        let active = store.getState().boxes[box_id - 1].active;
+        if(active == idx ){
+          $(this).focus();
+        }else{
+          if(idx < store.getState().boxes[box_id - 1].cases.length){
+            store.dispatch(hs_box_active(box_id, idx));
+          }else{
+
+          }
+          
         }
+        
       });
 
       
