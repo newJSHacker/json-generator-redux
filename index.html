@@ -156,6 +156,48 @@
       width: 100%;
     }
 
+    .sub-ad-item input{
+      padding-left:5px;
+      border: none;
+      background: gray;
+    }
+
+    .sub-ad-item input.isflow{
+      background: green;
+    }
+
+    #overlay{ 
+      position: fixed;
+      top: 0;
+      z-index: 100;
+      width: 100%;
+      height:100%;
+      display: none;
+      background: rgba(0,0,0,0.6);
+    }
+    .cv-spinner {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;  
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px #ddd solid;
+      border-top: 4px #2e93e6 solid;
+      border-radius: 50%;
+      animation: sp-anime 0.8s infinite linear;
+    }
+    @keyframes sp-anime {
+      100% { 
+        transform: rotate(360deg); 
+      }
+    }
+    .is-hide{
+      display:none;
+    }
+
     
   </style>
 </head>
@@ -200,6 +242,12 @@
       </div>
 
     </footer>
+
+    <div id="overlay">
+      <div class="cv-spinner">
+        <span class="spinner"></span>
+      </div>
+    </div>
     
   </div>
 
@@ -227,6 +275,9 @@
 
       const AD_MAIN_SELECT = 'AD_MAIN_SELECT';
       const AD_SUB_SELECT = 'AD_SUB_SELECT';
+
+      const IS_LOADING = 'IS_LOADING';
+      const NO_LOADING = 'NO_LOADING';
 
 
       const hs_new_box = (text, prev_box_id) => ({type:HS_NEW_BOX, text: text, prev_box_id: prev_box_id});
@@ -472,7 +523,35 @@
 
       render();
 
-      $("#create_test").click(() => alert(JSON.stringify(store.getState())));
+      $("#create_test").click(() =>
+        {
+          let str = JSON.stringify(store.getState().boxes);
+
+
+          
+          str = str.replace(/"/g, "\\\"");
+          str = str.replace(/[\?\!\.\']/g, " ");
+          
+          var ajax_object = {"ajax_url":"http:\/\/noiman.com/\/wp-admin\/admin-ajax.php"};
+
+          
+          jQuery.ajax({
+              type: 'GET',
+              url: ajax_object.ajax_url,
+              data:{
+                'action':'hello', 
+                'param':store.getState().boxes
+              },
+              beforeSend: function() {
+                $("#overlay").fadeIn(300);
+              },
+              success: function(response) {
+                $("#overlay").fadeOut(300, function(){alert("result: " + response);});
+              }
+          });
+
+        }
+      );
 
       let selected_input;
 
@@ -644,6 +723,7 @@
 
             $.each(items, function (index, item){
               
+              /*
               $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + items.indexOf(item) + '">' +
                                       '<input readonly="readonly" value="' + item.content + '">' + 
                                       '<div>' + 
@@ -651,6 +731,17 @@
                                         '<!--<button class="delete">Delete</button>-->' +
                                       '</div>' +
                                     '</div>');
+              */
+
+              if(item.next){
+                $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + items.indexOf(item) + '">' +
+                                      '<input readonly="readonly" class="isflow" value="' + item.content + '">' + 
+                                    '</div>');
+              }else{
+                $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + items.indexOf(item) + '">' +
+                                      '<input readonly="readonly" value="' + item.content + '">' + 
+                                    '</div>');
+              }
             });
 
             let offset = $(this).offset();
