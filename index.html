@@ -527,28 +527,28 @@
         {
           let str = JSON.stringify(store.getState().boxes);
 
+          alert(str);
+          
+          // str = str.replace(/"/g, "\\\"");
+          // str = str.replace(/[\?\!\.\']/g, " ");
+          
+          // var ajax_object = {"ajax_url":"http:\/\/noiman.com/\/wp-admin\/admin-ajax.php"};
 
           
-          str = str.replace(/"/g, "\\\"");
-          str = str.replace(/[\?\!\.\']/g, " ");
-          
-          var ajax_object = {"ajax_url":"http:\/\/noiman.com/\/wp-admin\/admin-ajax.php"};
-
-          
-          jQuery.ajax({
-              type: 'GET',
-              url: ajax_object.ajax_url,
-              data:{
-                'action':'hello', 
-                'param':store.getState().boxes
-              },
-              beforeSend: function() {
-                $("#overlay").fadeIn(300);
-              },
-              success: function(response) {
-                $("#overlay").fadeOut(300, function(){alert("result: " + response);});
-              }
-          });
+          // jQuery.ajax({
+          //     type: 'GET',
+          //     url: ajax_object.ajax_url,
+          //     data:{
+          //       'action':'hello', 
+          //       'param':store.getState().boxes
+          //     },
+          //     beforeSend: function() {
+          //       $("#overlay").fadeIn(300);
+          //     },
+          //     success: function(response) {
+          //       $("#overlay").fadeOut(300, function(){alert("result: " + response);});
+          //     }
+          // });
 
         }
       );

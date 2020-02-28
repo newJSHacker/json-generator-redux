@@ -1,6 +1,6 @@
 <?php
 /*
- * Template Name: Dialog JSON-API Integration Updated
+ * Template Name: Dialog System (Redux)
  *
  *
  * */
@@ -18,7 +18,6 @@ get_header(); ?>
                   <style>
     .alexa-body{
       background: #334453;
-      padding-top: 50px;
     }
     .alexa-header{
       background: #253443;
@@ -33,13 +32,14 @@ get_header(); ?>
     .alexa-footer{
       background: #253443;
       height: 70px;
-      padding-top: 2px;
+      padding-top: 15px;
     }
     .alexa-section{
       height: auto;
       min-height: calc(100vh - 640px);
       background: #202a34;
       overflow-y: auto;
+     
     }
 
     .alexa-row{
@@ -87,6 +87,7 @@ get_header(); ?>
       width: 28%;
       background: #8492af;
       position: absolute;
+      
       border-radius: 3px;
       padding: 10px 5px;
       box-shadow: 5px 5px 10px;
@@ -156,8 +157,6 @@ get_header(); ?>
       outline: none;
       border: none;
     }
-
-
     .ad.alexa-box{
       width: 40%;
       margin-right: 5px;
@@ -167,7 +166,8 @@ get_header(); ?>
     }
     
     
-    @media screen and (max-width:768px) {
+    
+     @media screen and (max-width:768px) {
     
     	.alexa-section{
         	padding-bottom:80px;
@@ -188,10 +188,8 @@ get_header(); ?>
       		padding-left:0px;
             text-align:center;
     	}
-    
-    }
 
-    .sub-ad-item input{
+      .sub-ad-item input{
       padding-left:5px;
       border: none;
       background: gray;
@@ -244,24 +242,20 @@ get_header(); ?>
       </div>
     </div>
 
-  <div class="alexa-container container">
+  <div class="">
 
     <header class="alexa-header">
 
       <div class="alexa-row">
         <div class="row-id" style="visibility: hidden;"></div>
-        <div class="alexa-box">Human says:</div>
-        <div class="alexa-box">Al says:</div>
-        <div class="alexa-box">Al does:</div>
+        <div class="alexa-box">Human Says:</div>
+        <div class="alexa-box">Al Says:</div>
+        <div class="alexa-box">Al Does:</div>
       </div>
 
     </header>
 
     <section class="alexa-section">
-
-      <div id="hs-dropdown" class="dropdown">
-        <p class="add-new"> + Add New </p>
-      </div>
 
       <div id="as-dropdown" class="dropdown">
       </div>
@@ -289,31 +283,248 @@ get_header(); ?>
     
   </div>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <!-- JavaScript Libraries -->
+  <script src="./jquery.min.js"></script>
+  <script src="http://noiman.com/wp-content/themes/businesslounge-child/redux.js"></script>
   
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  
-<script>
+  <script>
     jQuery(document).ready(function ($) {
 
-      var data = { boxes:[] };
-      var i = 1;      
-      var alexa_contents = [];     
-      var selected_input;
-      var row_id = 1;
+      const HS_NEW_BOX = 'HS_NEW_BOX';
+      const HS_BOX_ADD = 'HS_BOX_ADD';
+      const HS_BOX_EDIT = 'HS_BOX_EDIT';
+      const HS_BOX_ACTIVE = 'HS_BOX_ACTIVE';
 
-      var ad_contents = [
-        {
-          main:'light',
-          sub: ['light on', 'light off']
-        }, 
-        {
-          main: 'music streaming',
-          sub: []
+      const AS_NEW_BOX = 'AS_NEW_BOX';
+      const AS_BOX_EDIT = 'AS_BOX_EDIT';
+      const AS_SELECT = 'AS_SELECT';
+
+      const AD_NEW_BOX = 'AD_NEW_BOX';
+      const AD_BOX_EDIT = 'AD_BOX_EDIT';
+
+      const AD_MAIN_ADD = 'AD_MAIN_ADD';
+      const AD_SUB_ADD = 'AD_SUB_ADD';
+      
+      const AD_MAIN_SELECT = 'AD_MAIN_SELECT';
+      const AD_SUB_SELECT = 'AD_SUB_SELECT';
+
+
+      const hs_new_box = (text, prev_box_id) => ({type:HS_NEW_BOX, text: text, prev_box_id: prev_box_id});
+      const hs_box_add = (text, box_id) => ({type:HS_BOX_ADD, text: text, box_id:box_id});
+      const hs_box_edit = (text, box_id, idx) => ({type:HS_BOX_EDIT, text: text, box_id:box_id, idx: idx});
+      const hs_box_active = (box_id, idx) => ({type:HS_BOX_ACTIVE, box_id:box_id, idx: idx});
+
+      const as_new_box = (text, prev_box_id) => ({type:AS_NEW_BOX, text: text, prev_box_id: prev_box_id});
+      const as_box_edit = (box_id, text) => ({type:AS_BOX_EDIT, text: text, box_id:box_id});
+      const as_select = (box_id, prev_box_id) => ({type:AS_SELECT, box_id: box_id, prev_box_id:prev_box_id});
+
+      const ad_new_box = (main, sub, prev_box_id) => ({type:AD_NEW_BOX, main: main, sub: sub , prev_box_id: prev_box_id});
+      const ad_box_edit = (box_id, main, sub) => ({type: AD_BOX_EDIT, box_id: box_id, main: main, sub: sub});
+
+      const ad_main_add = (prev_box_id,box_id, text) => ({type: AD_MAIN_ADD, box_id:box_id, text: text, prev_box_id: prev_box_id});
+      const ad_sub_add = (box_id, text, main_idx) =>({type: AD_SUB_ADD, main_idx: main_idx, text: text, box_id:box_id});
+
+      const ad_main_select = (box_id, main_idx) =>({type: AD_MAIN_SELECT, main_idx: main_idx, box_id: box_id});
+      const ad_sub_select = (box_id, sub_idx) =>({type: AD_SUB_SELECT, box_id: box_id, sub_idx: sub_idx});
+
+      const initialState = {
+        boxes:[],
+        
+      };
+
+      const counter = (state = initialState, action) => {
+
+        let box_id = state.boxes.length + 1;
+
+        switch(action.type) {
+
+          case HS_NEW_BOX:
+
+            state.boxes.push(
+              {
+                id: box_id, 
+                action: 'hs',
+                active: 0,
+                cases:[
+                  {
+                    content: action.text,
+                    next: 0
+                  }
+                ]
+              });
+
+            if(box_id - 1){
+              if(state.boxes[action.prev_box_id - 1].action == 'ad'){
+                let prev_box = state.boxes[action.prev_box_id - 1];
+                let main = prev_box.active.main;
+                if(prev_box.content[main].isSub){
+                  let sub = prev_box.active.sub;
+                  prev_box.content[main].sub[sub].next = box_id;
+                }else{
+                  prev_box.content[main].next = box_id;
+                }
+              }else{
+                state.boxes[action.prev_box_id - 1].next = box_id;
+              }
+                
+            }
+
+            return state;
+
+          case HS_BOX_ADD:
+
+            state.boxes[action.box_id - 1].cases.push(
+              {
+                content: action.text,
+                next: 0
+              });
+
+            return state;
+
+          case HS_BOX_EDIT:
+
+            state.boxes[action.box_id - 1].cases[action.idx].content = action.text;
+
+            return state;
+
+          case HS_BOX_ACTIVE:
+
+            state.boxes[action.box_id - 1].active = action.idx;
+
+            return state;
+
+          case AS_NEW_BOX:
+            state.boxes.push(
+              {
+                id: box_id, 
+                action: 'as',
+                content: action.text,
+                next: 0
+              });
+            if(box_id - 1){
+              if(state.boxes[action.prev_box_id - 1].action == 'hs'){
+                let active = state.boxes[action.prev_box_id - 1].active;
+                state.boxes[action.prev_box_id - 1].cases[active].next = box_id;
+              }else{
+                let prev_box = state.boxes[action.prev_box_id - 1];
+                let main = prev_box.active.main;
+                if(prev_box.content[main].isSub){
+                  let sub = prev_box.active.sub;
+                  prev_box.content[main].sub[sub].next = box_id;
+                }else{
+                  prev_box.content[main].next = box_id;
+                }
+                
+              }
+            }
+            return state;
+
+          case AS_BOX_EDIT:
+
+            state.boxes[action.box_id - 1].content = action.text;
+            return state;
+
+          case AS_SELECT:
+            if(state.boxes[action.prev_box_id - 1].action == 'hs'){
+              let active = state.boxes[action.prev_box_id - 1].active;
+              state.boxes[action.prev_box_id - 1].cases[active].next = action.box_id;
+            }else{
+              let prev_box = state.boxes[action.prev_box_id - 1];
+              let main = prev_box.main;
+              if(state.ad[main].isSub){
+                let sub = prev_box.sub;
+                state.ad[main].sub[sub].next = action.box_id;
+              }else{
+                state.ad[main].next = action.box_id;
+              }
+            }
+            return state;
+
+          case AD_MAIN_ADD:
+            if(action.box_id){
+              let box = state.boxes[action.box_id - 1]
+              box.content.push({
+                isSub:false,
+                main: action.text,
+                sub:[],
+                next: 0
+              });
+              box.active.main = box.content.length - 1;
+              box.sub = 0;
+            }else{          
+                state.boxes.push(
+                  {
+                    id: box_id, 
+                    action: 'ad',
+                    active:{ main:0, sub:0},
+                      content:[
+                        {
+                          isSub: false,
+                          main:action.text,
+                          sub: [],
+                          next: 0
+                        }, 
+                      ],
+                  });
+                if(box_id - 1){
+                  if(state.boxes[action.prev_box_id - 1].action == 'hs'){
+                    let active = state.boxes[action.prev_box_id - 1].active;
+                    state.boxes[action.prev_box_id - 1].cases[active].next = box_id;
+                  }else{
+                    state.boxes[action.prev_box_id - 1].next = box_id;
+                  }
+                }
+            }
+            return state;
+
+          case AD_SUB_ADD:
+            let box = state.boxes[action.box_id - 1]
+            box.content[action.main_idx].sub.push({
+              content: action.text,
+              next: 0
+            });
+
+            box.content[action.main_idx].isSub = true;
+            box.active.sub = box.content[action.main_idx].sub.length - 1;
+
+            return state;
+
+          case AD_MAIN_SELECT:
+            state.boxes[action.box_id - 1].active.main = action.main_idx;
+            state.boxes[action.box_id - 1].active.sub = 0;
+
+            return state;
+
+          case AD_SUB_SELECT:
+            state.boxes[action.box_id - 1].active.sub = action.sub_idx;
+
+            return state;
+
+          default:
+            return state;
         }
-      ];
-    
-      newRow(1, '');
+      }
+
+      const { createStore } = Redux;
+      const store = createStore(counter);
+
+      let boxes = [];
+
+
+      const render = () => {
+        $('section .alexa-row').remove();
+        if(!store.getState().boxes.length){
+          newRow(1,'');
+        }else{
+          
+          boxes = store.getState().boxes;
+          showDialog();
+        }
+      }
+
+      store.subscribe(render);
+
+      render();
 
       $("#create_test").click(() =>
         {
@@ -344,8 +555,10 @@ get_header(); ?>
 
         }
       );
-	  
-	  /****** Human Says DropDown ******/
+
+      let selected_input;
+
+      /*******  HS ********/
 
       $(document).on('click', '.add-new', function(){
         if(!$('.new-input').length){
@@ -357,123 +570,72 @@ get_header(); ?>
 
       $(document).on('change', '.hs-box input', function(){
         
-        let txt = $(this).val();
+        let text = $(this).val();
         let hs_box = $(this).parent();
 
         if($(this).hasClass('new-input')){ 
           if(!$(this).parent().attr('box_id')){
-            hs_box.attr('box_id', data.boxes.length);
-            data.boxes.push(
-              {
-                id: data.boxes.length, 
-                action: 'hs',
-                cases:[
-                  {
-                    content: txt,
-                    next: 0
-                  }
-                ]
-              });
-            
-            if($(this).parent().parent('.alexa-row').attr('rowid') - 1){
-              data.boxes[$(this).parent().parent('.alexa-row').prev().find('.box').attr('box_id')].cases[0].next = data.boxes.length - 1;
-            }
+            let prev_box_id = $(this).parent().parent('.alexa-row').prev().find('.box').attr('box_id');
+            store.dispatch(hs_new_box(text, prev_box_id));
           }else{
             let box_id = parseInt(hs_box.attr('box_id'));
-            data.boxes[box_id].cases.push({content: txt, next:0});
+            store.dispatch(hs_box_add(text, box_id));
           }
-          hs_box.attr('content', $(this).val());
-          hs_box.attr('idx', hs_box.find('input').length - 1) ;
-          $(this).removeClass('new-input');
-          $(this).trigger('click');
         }else{ 
-          $(this).parent().attr('content', $(this).val());
-          $(this).parent().attr('idx', $(this).attr('idx')) ;
           let box_id = $(this).parent().attr('box_id');
           let idx = $(this).attr('idx');
-          data.boxes[box_id].cases[idx].content = $(this).val();
+          store.dispatch(hs_box_edit(text, box_id, idx));
         }
-
-        
       });
-
+      
+      
       $(document).on('click', '.hs-box input', function(e){
-        e.preventDefault();
-        $(this).parent().find('input').removeClass('active');
-        $(this).addClass('active');
-        $(this).parent().attr('content', $(this).val());
-        $(this).parent().attr('idx', $(this).attr('idx')) ;
-        $(this).parent().trigger('change');
-        $(this).focus();
-      });
+        let box_id = $(this).parent().attr('box_id');
+        let idx = $(this).attr('idx');
+        let text = $(this).val().trim();
 
-      $(document).on('change', '.hs-box', function(){
-        if($(this).hasClass('new')){
-
-          $(this).removeClass('new');
-          $('.new').replaceWith('<div class="alexa-box"></div>');
-          /***** $('.dropdown').slideUp(); *******/
-          row_id ++;
-          newRow(row_id, 'hs');
-          
-          $('.as.new').trigger('click').focus();
-          
+        let active = store.getState().boxes[box_id - 1].active;
+        if(active == idx ){
+          $(this).focus();
         }else{
-          $(this).parent('.alexa-row').nextAll('.alexa-row').remove();
-          row_id = $(this).parent('.alexa-row').attr('rowid');
-          showDialog( 'hs', $(this).attr('box_id'), $(this).attr('idx'));
+          if(idx < store.getState().boxes[box_id - 1].cases.length){
+            store.dispatch(hs_box_active(box_id, idx));
+          }else{
+
+          }
+          
         }
         
-        $(this).blur();
       });
+      
 
-           /* Alexa Says DropDown */
+
+      /***********AS**********/
 
       $(document).on('click', '.as', function(){
         if( $('#as-dropdown').css('display') == 'none'){
           $('#as-dropdown').html('');
-          let items = data.boxes;
+          let items = store.getState().boxes;
           alexa_contents = [];
 
           $.each(items, function (index, item){
             if(item.action == 'as'){
-              $.each(item.cases, function(index, i_case){
-                alexa_contents.push({box_id: item.id, content:i_case.content});
-              });
+                alexa_contents.push({box_id: item.id, content:item.content});
             }
           });
-          
-          
+
           alexa_contents = $.unique(alexa_contents);
-          
-         
+
           $.each(alexa_contents, function(index, text){
             $('#as-dropdown').append('<p class="ad-item" idx="' + text.box_id + '">' + text.content + '</p>');
           });
 
-          
-
           let offset = $(this).offset();
           let dropdown = $('#as-dropdown');
           let width = $('.alexa-box').width();
-          dropdown.animate({top: offset.top+ 53 - $('.sub_page_header').offset().top, left: offset.left, width: width}, 10, function(){ $(this).slideDown()});
+          dropdown.animate({top: offset.top+53 - $('.sub_page_header').offset().top, left: offset.left, width: width}, 10, function(){ $(this).slideDown()});
           selected_input = $(this);
         }
-        
-      });
-
-      $(document).on('click', '#as-dropdown p', function(e){
-        selected_input.val($(this).text());
-        selected_input.attr('box_id', $(this).attr('idx'));
-        $("#as-dropdown").slideUp();
-        
-        selected_input.siblings('.alexa-box').replaceWith('<div class="alexa-box"></div>');
-        selected_input.parent('.alexa-row').nextAll('.alexa-row').remove();
-        row_id = selected_input.parent('.alexa-row').attr('rowid');
-        showDialog( 'as', $(this).attr('idx'), 0);
-        let box_id = selected_input.parent('.alexa-row').prev().find('.box').attr('box_id');
-        let idx = selected_input.parent('.alexa-row').prev().find('.box').attr('idx');
-        data.boxes[box_id].cases[idx].next = selected_input.attr('box_id');
         
       });
 
@@ -485,45 +647,36 @@ get_header(); ?>
       });
 
       $(document).on('change', '.as', function(){
+        let text = $(this).val();
         if($(this).hasClass('new')){
-          
-            $(this).attr('box_id', data.boxes.length);
-
-            data.boxes.push(
-            {
-              id: data.boxes.length, 
-              action: 'as',
-              cases:[
-                {
-                  content: $(this).val(),
-                  next: 0
-                }
-              ]
-            });
-         
-          $(this).removeClass('new');
-          
-          $('.new').removeClass('new').replaceWith('<div class="alexa-box"></div>');
-          $('.dropdown').slideUp();
-          if(data.boxes.length - 1){
-            
-            let box_id = $(this).parent('.alexa-row').prev().find('.box').attr('box_id');
-            let idx = $(this).parent('.alexa-row').prev().find('.box').attr('idx');
-            data.boxes[box_id].cases[idx].next = data.boxes.length - 1;
-          }
-          row_id ++;
-          newRow(row_id, 'as');
-          
+          let prev_box_id = $(this).parent('.alexa-row').prev().find('.box').attr('box_id');
+          store.dispatch(as_new_box(text, prev_box_id));
         }else{
           let box_id = parseInt($(this).attr('box_id'));
-          data.boxes[box_id].cases[0].content = $(this).val();
+          store.dispatch(as_box_edit(box_id, text));
         }
-        $(this).blur();
+        $("#as-dropdown").slideUp();
+        // $(this).blur();
+      });
+
+      $(document).on('click', '#as-dropdown p', function(e){
+
+        let box_id = $(this).attr('idx');
+        let prev_box_id = selected_input.parent('.alexa-row').prev().find('.box').attr('box_id');
+        store.dispatch(as_select(box_id, prev_box_id));
+        $("#as-dropdown").slideUp();
+
+      });
+
+      $(document).click(function (e) {
+          if (!$(e.target).hasClass("dropdown") && $(e.target).parents("#as-dropdown").length === 0) 
+          {
+              $("#as-dropdown").slideUp();
+          }
       });
 
 
-
-      /******** Alexa Does Dropdown  ***************/
+      /*******    AD    *******/
 
       $(document).on('click', '.ad.main', function(){
         if( $('#ad-dropdown').css('display') == 'none'){
@@ -531,21 +684,28 @@ get_header(); ?>
           $('.ad-item').remove();
           $('.ad-new-input').remove();
 
-          $.each(ad_contents, function (index, item){
-            
-            $('.ad-new-btn').before('<div class="ad-item" idx="' + ad_contents.indexOf(item) + '">' +
-                                    '<input readonly="readonly" value="' + item.main + '">' + 
-                                    '<div>' + 
-                                      '<!--<button class="edit">Edit</button> -->' + 
-                                      '<!--<button class="delete">Delete</button>-->' +
-                                    '</div>' +
-                                  '</div>');
-          });
+          let box_id = $(this).parent().attr('box_id');
+
+          if(box_id){
+              ad = store.getState().boxes[box_id - 1].content;
+
+              $.each(ad, function (index, item){
+
+                $('.ad-new-btn').before('<div class="ad-item" idx="' + ad.indexOf(item) + '">' +
+                                        '<input readonly="readonly" value="' + item.main + '">' + 
+                                        '<div>' + 
+                                          '<!--<button class="edit">Edit</button> -->' + 
+                                          '<!--<button class="delete">Delete</button>-->' +
+                                        '</div>' +
+                                      '</div>');
+              });
+          }
+          
 
           let offset = $(this).offset();
           let dropdown = $('#ad-dropdown');
           let width = $('.alexa-box').width();
-          dropdown.animate({top: offset.top+ 53 - $('.sub_page_header').offset().top, left: offset.left, width: width/2}, 10, function(){ $(this).slideDown()});
+          dropdown.animate({top: offset.top+53 - $('.sub_page_header').offset().top, left: offset.left, width: width/2}, 10, function(){ $(this).slideDown()});
           selected_input = $(this);
         }
         
@@ -556,12 +716,14 @@ get_header(); ?>
 
           $('.sub-ad-item').remove();
           $('.sub-ad-new-input').remove();
+
+          
           if($(this).parent().find('.main').attr('idx') + 1){
-            let items = ad_contents[$(this).parent().find('.main').attr('idx')].sub;
+            let items = store.getState().boxes[$(this).parent().attr('box_id') - 1].content[$(this).parent().find('.main').attr('idx')].sub;
 
             $.each(items, function (index, item){
               
-              if(item.next){
+             if(item.next){
                 $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + items.indexOf(item) + '">' +
                                       '<input readonly="readonly" class="isflow" value="' + item.content + '">' + 
                                     '</div>');
@@ -591,7 +753,7 @@ get_header(); ?>
         $('.ad-new-input').focus();
       });
 
-       $(document).on('click', '.sub-ad-new-btn', function(){
+      $(document).on('click', '.sub-ad-new-btn', function(){
         if(!$('.sub-ad-new-input').length){
            $('#sub-ad-dropdown').prepend('<input class="sub-ad-new-input" type="text">');
         }
@@ -601,57 +763,46 @@ get_header(); ?>
 
       $(document).on('click', '#ad-dropdown .ad-item input', function(e){
         if($(this).attr('readonly') == 'readonly'){
-          selected_input.val($(this).val());
-          selected_input.attr('idx', $(this).parent().attr('idx'));
-          selected_input.trigger('change');
-          $("#ad-dropdown").slideUp();
 
-          selected_input.parent().find('.sub').val('');
+          let box_id = selected_input.parent().attr('box_id');
+          let idx = $(this).parent().attr('idx');
+          $('#ad-dropdown').slideUp();
 
-          if(!ad_contents[$(this).parent().attr('idx')].sub.length){
-            selected_input.parent().find('.sub').val($(this).val()).trigger('change');
-
-          }
+          store.dispatch(ad_main_select(box_id, idx));
         }
       });
 
       $(document).on('click', '#sub-ad-dropdown .sub-ad-item input', function(e){
         if($(this).attr('readonly') == 'readonly'){
-          selected_input.val($(this).val());
-          selected_input.attr('idx', $(this).parent().attr('idx'));
-          selected_input.trigger('change');
+          let box_id = selected_input.parent().attr('box_id');
+          let idx = $(this).parent().attr('idx');
           $("#sub-ad-dropdown").slideUp();
+
+          store.dispatch(ad_sub_select(box_id, idx));
         }
       });
 
       $(document).on('change', '.ad-new-input', function(){
         let txt = $(this).val();
+        $('.dropdown').slideUp();
 
-        $('.ad-new-btn').before('<div class="ad-item" idx="' + $('#ad-dropdown .ad-item').length + '">' +
-                                    '<input readonly="readonly" value="' + txt + '">' + 
-                                    '<div>' + 
-                                      '<!--<button class="edit">Edit</button>-->' + 
-                                      '<!--<button class="delete">Delete</button>-->' +
-                                    '</div>' +
-                                  '</div>');
-                                  
-        ad_contents.push({main: txt, sub: []});
+        let prev_box_id = selected_input.parent().parent('.alexa-row').prev().find('.box').attr('box_id');
 
-        $(this).remove();
+        let box_id = selected_input.parent().attr('box_id');
+        box_id = box_id ? box_id : 0 ;
+
+        store.dispatch(ad_main_add(prev_box_id, box_id, txt));
       });
 
       $(document).on('change', '.sub-ad-new-input', function(){
         let txt = $(this).val();
+        let main_idx = selected_input.parent().find('.main').attr('idx');
 
-        $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + $('#sub-ad-dropdown .sub-ad-item').length + '">' +
-                                    '<input readonly="readonly" value="' + txt + '">' + 
-                                    '<div>' + 
-                                      '<!--<button class="edit">Edit</button>-->' + 
-                                      '<!--<button class="delete">Delete</button>-->' +
-                                    '</div>' +
-                                  '</div>');
-        ad_contents[selected_input.parent().find('.main').attr('idx')].sub.push($(this).val());
-        $(this).remove();
+        let box_id = selected_input.parent().attr('box_id');
+
+        $('.dropdown').slideUp();
+
+        store.dispatch(ad_sub_add(box_id, txt, main_idx));
       });
 
       $(document).click(function (e) {
@@ -668,69 +819,18 @@ get_header(); ?>
           }
       });
 
-      $(document).on('change', '.ad.main', function(){
-        
-      })
-
       $(document).on('change', '.ad.sub', function(){
+
+        let main = $(this).parent().find('.main').attr('idx');
+        let sub = $(this).attr('idx');
+
         if($(this).parent().hasClass('new')){
-
-            $(this).parent().attr('box_id', data.boxes.length);
-            let text = $(this).val();
-
-            data.boxes.push(
-            {
-              id: data.boxes.length, 
-              action: 'ad',
-              cases:[
-                {
-                  content: [$(this).parent().find('.main').val(), $(this).val()],
-                  next: 0
-                }
-              ]
-            });
-          
-
-          $(this).parent().removeClass('new');
-          
-          $('.new').removeClass('new').replaceWith('<div class="alexa-box"></div>');
-          $('.dropdown').slideUp();
-          if(data.boxes.length - 1){
-            let box_id = $(this).parent().parent('.alexa-row').prev().find('.box').attr('box_id');
-            let idx = $(this).parent().parent('.alexa-row').prev().find('.box').attr('idx');
-            data.boxes[box_id].cases[idx].next = data.boxes.length - 1;
-          }
-          row_id ++;
-
-          $.each(data.boxes, function (index, item){
-            if(item.action == 'ad'){
-            	if(item.cases[0].content[1] == text){
-            		let box_id = item.id;
-            		if(box_id < data.boxes.length - 1){
-            			box_id = data.boxes[box_id].cases[0].next;
-            			action = data.boxes[box_id].action;
-			          	let txt = data.boxes[box_id].cases[0].content;
-			        
-			          	createRow(row_id, box_id, action, txt);
-			          	row_id++;
-			          	newRow(row_id, action);
-			          	return false;
-            		}else{
-            			newRow(row_id, 'ad');
-          				$('.hs.new').trigger('click');
-          				return false;
-            		}
-            		
-            	}
-            }
-          });
-
-
+          let prev_box_id = $(this).parent().parent('.alexa-row').prev().find('.box').attr('box_id');
+          store.dispatch(ad_new_box(main, sub, prev_box_id));
         }else{
           let box_id = parseInt($(this).parent().attr('box_id'));
-          data.boxes[box_id].cases[0].content = $(this).val();
+          store.dispatch(ad_box_edit(box_id, main, sub));
         }
-        $(this).blur();
       });
 
       $(document).on('click', '.ad-new-btn', function(){
@@ -741,58 +841,7 @@ get_header(); ?>
         $('.ad-new-input').focus();
       });
 
-      /****** Common Functions  *******/
-
-      function showDialog(action, box_id, idx){
-        ++ row_id;
-        box_id = data.boxes[box_id].cases[idx].next;
-        while(box_id){
-          action = data.boxes[box_id].action;
-          let text = data.boxes[box_id].cases[0].content;
-        
-          createRow(row_id, box_id, action, text);
-          box_id = data.boxes[box_id].cases[0].next;
-          ++ row_id;
-        }
-
-        newRow(row_id, action);
-      }
-
-      function createRow(row_id, box_id, action, text){
-
-        let row = '';
-        let id_input = '<input class="row-id" type="text" value="' + row_id + '" disabled>';
-        let empty_input = '<div class="alexa-box"></div>';
-        let row_start = '<div class="alexa-row" rowid="' + row_id + '">';
-        let row_end = '</div>';
-        switch(action){
-          case 'hs':
-            let items = data.boxes[box_id].cases;
-
-            let hs_box = '';
-
-            $.each(items, function (index, item){
-              if(!index){
-                hs_box = hs_box + '<input type="text" class="active" idx="' + items.indexOf(item) + '" value="' + item.content + '">';
-              }else{
-                hs_box = hs_box + '<input type="text" idx="' + items.indexOf(item) + '" value="' + item.content + '">';
-              }
-              
-            });
-            hs_box = '<div class="hs-box box" box_id="' + box_id + '" content="' + text + '" idx="0">' +
-             hs_box + '<button class="add-new">Add New</button></div>';
-            row = row_start + id_input + hs_box + empty_input + empty_input + row_end;
-            break;
-          case 'as':
-            row = row_start + id_input + empty_input + '<input class="as alexa-box box" type="text" value="' + text + '" box_id="' + box_id + '"  idx="0">' + empty_input + row_end;
-            break;
-          case 'ad':
-            row = row_start + id_input + empty_input + empty_input + '<div class="alexa-box box" idx="0" ' + '" box_id="' + box_id + '"><input readonly="readonly"  class="ad alexa-box main" type="text" value="' + text[0] + '"  idx=""><input readonly="readonly"  class="ad alexa-box sub" type="text" value="' + text[1] + '" box_id="' + box_id + '"  idx="0"></div>' + row_end;
-            break;
-        }
-        $('.alexa-section').append(row);
-      }
-
+      /******   Common  ******/
       function newRow(id, action){
         let row = '';
         let id_input = '<input class="row-id" type="text" value="' + id + '" disabled>';
@@ -819,14 +868,93 @@ get_header(); ?>
         }
         
         $('.alexa-section').append(row);
-        
         if($('.as.new').length){
           $('.as.new').focus();
         }else{
           $('.hs.new').trigger('click');
         }
-        
       }
+
+      function showDialog(){
+        let row_id = 1;
+        let box_id = 1;
+        let action = '';
+        while(box_id){
+          let box = boxes[box_id - 1];
+          action = box.action;
+
+          if(action == 'hs'){
+            let active = box.active;
+            let text = box.cases[active].content;
+            createRow(row_id, box_id,  box, action, text);
+            box_id = box.cases[active].next;
+          }else if(action == 'ad'){
+            let text = box.content;
+            createRow(row_id, box_id, box, action, text);
+            let ad = store.getState().boxes[box_id - 1];
+            if(ad.content[ad.active.main].isSub){
+              box_id = ad.content[ad.active.main].sub[ad.active.sub].next;
+            }else{
+              box_id = ad.content[ad.active.main].next;
+            }
+            
+          }else{
+            let text = box.content;
+            createRow(row_id, box_id, box, action, text);
+            box_id = box.next;
+          }
+          
+          ++ row_id;
+        }
+
+        newRow(row_id, action);
+      }
+
+      function createRow(row_id, box_id, box, action, text){
+
+        let row = '';
+        let id_input = '<input class="row-id" type="text" value="' + row_id + '" disabled>';
+        let empty_input = '<div class="alexa-box"></div>';
+        let row_start = '<div class="alexa-row" rowid="' + row_id + '">';
+        let row_end = '</div>';
+        switch(action){
+          case 'hs':
+            let items = box.cases;
+
+            let hs_box = '';
+
+            $.each(items, function (index, item){
+              if(index == box.active){
+                hs_box = hs_box + '<input type="text" class="active" idx="' + items.indexOf(item) + '" value="' + item.content + '">';
+              }else{
+                hs_box = hs_box + '<input type="text" idx="' + items.indexOf(item) + '" value="' + item.content + '">';
+              }
+              
+            });
+            hs_box = '<div class="hs-box box" box_id="' + box_id + '" content="' + text + '" idx="0">' +
+             hs_box + '<button class="add-new">Add New</button></div>';
+            row = row_start + id_input + hs_box + empty_input + empty_input + row_end;
+            break;
+          case 'as':
+            row = row_start + id_input + empty_input + '<input class="as alexa-box box" type="text" value="' + text + '" box_id="' + box_id + '"  idx="0">' + empty_input + row_end;
+            break;
+          case 'ad':
+            let ad = store.getState().boxes[box_id - 1];
+            let maintext = ad.content[ad.active.main].main;
+            let subtext;
+            if(ad.content[ad.active.main].isSub){
+              subtext = ad.content[ad.active.main].sub[ad.active.sub].content;
+            }else{
+              subtext = '';
+            }
+            row = row_start + id_input + empty_input + empty_input + '<div class="alexa-box box" idx="0" ' + '" box_id="' + box_id + '"><input readonly="readonly"  class="ad alexa-box main" type="text" value="' + maintext + '"  idx="' + box.active.main + '"><input readonly="readonly"  class="ad alexa-box sub" type="text" value="' + subtext + '" idx="' + box.active.sub + '"></div>' + row_end;
+            break;
+        }
+        $('.alexa-section').append(row);
+      }
+
+
+
 
     });
   </script>
