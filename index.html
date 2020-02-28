@@ -159,10 +159,9 @@
     .sub-ad-item input{
       padding-left:5px;
       border: none;
-      background: gray;
     }
 
-    .sub-ad-item input.isflow{
+    input.isflow{
       background: green;
     }
 
@@ -295,11 +294,25 @@
       const ad_main_add = (prev_box_id,box_id, text) => ({type: AD_MAIN_ADD, box_id:box_id, text: text, prev_box_id: prev_box_id});
       const ad_sub_add = (box_id, text, main_idx) =>({type: AD_SUB_ADD, main_idx: main_idx, text: text, box_id:box_id});
 
-      const ad_main_select = (box_id, main_idx) =>({type: AD_MAIN_SELECT, main_idx: main_idx, box_id: box_id});
+      const ad_main_select = (prev_box_id, box_id, main_idx) =>({type: AD_MAIN_SELECT,prev_box_id: prev_box_id, main_idx: main_idx, box_id: box_id});
       const ad_sub_select = (box_id, sub_idx) =>({type: AD_SUB_SELECT, box_id: box_id, sub_idx: sub_idx});
 
       const initialState = {
         boxes:[],
+        ad:[
+          {
+            main:'light',
+            sub: ['light on','light off']
+          }, 
+          {
+            main:'Color',
+            sub: ['White', 'Black']
+          }, 
+          {
+            main: 'music streaming',
+            sub:[],
+          }
+        ],
       };
 
       const counter = (state = initialState, action) => {
@@ -327,11 +340,25 @@
               if(state.boxes[action.prev_box_id - 1].action == 'ad'){
                 let prev_box = state.boxes[action.prev_box_id - 1];
                 let main = prev_box.active.main;
-                if(prev_box.content[main].isSub){
+                let sub = prev_box.active.sub;
+                let ad = state.ad;
+                if(ad[main].sub.length){
                   let sub = prev_box.active.sub;
-                  prev_box.content[main].sub[sub].next = box_id;
+                  let main_text = ad[main].main;
+                  let sub_text = ad[main].sub[sub];
+                  prev_box.cases.push({
+                    id: main + '_' + sub,
+                    content: [main_text, sub_text],
+                    next: box_id,
+                  });
                 }else{
-                  prev_box.content[main].next = box_id;
+                  let main_text = ad[main].main;
+                  prev_box.cases.push({
+                    id: main + '_0',
+                    content: [main_text],
+                    next: box_id,
+                  });
+
                 }
               }else{
                 state.boxes[action.prev_box_id - 1].next = box_id;
@@ -378,11 +405,25 @@
               }else{
                 let prev_box = state.boxes[action.prev_box_id - 1];
                 let main = prev_box.active.main;
-                if(prev_box.content[main].isSub){
+                let sub = prev_box.active.sub;
+                let ad = state.ad;
+                if(ad[main].sub.length){
                   let sub = prev_box.active.sub;
-                  prev_box.content[main].sub[sub].next = box_id;
+                  let main_text = ad[main].main;
+                  let sub_text = ad[main].sub[sub];
+                  prev_box.cases.push({
+                    id: main + '_' + sub,
+                    content: [main_text, sub_text],
+                    next: box_id,
+                  });
                 }else{
-                  prev_box.content[main].next = box_id;
+                  let main_text = ad[main].main;
+                  prev_box.cases.push({
+                    id: main + '_0',
+                    content: [main_text],
+                    next: box_id,
+                  });
+
                 }
                 
               }
@@ -410,55 +451,58 @@
             }
             return state;
 
-          // case AD_NEW_BOX:
-          //   state.boxes.push(
-          //     {
-          //       id: box_id, 
-          //       action: 'ad',
-          //       main: action.main,
-          //       sub: action.sub
-          //     });
-          //   if(box_id - 1){
-          //     if(state.boxes[action.prev_box_id - 1].action == 'hs'){
-          //       let active = state.boxes[action.prev_box_id - 1].active;
-          //       state.boxes[action.prev_box_id - 1].cases[active].next = box_id;
-          //     }else{
-          //       state.boxes[action.prev_box_id - 1].next = box_id;
-          //     }
-          //   }
-          //   return state;
-
-          // case AD_BOX_EDIT:
-
-          //   state.boxes[action.box_id - 1].main = action.main;
-          //   state.boxes[action.box_id - 1].sub = action.sub;
-          //   return state;
-
           case AD_MAIN_ADD:
+            
+            let ad = state.ad;
+            ad.push({
+              main: action.text,
+              sub:[],
+            });
             if(action.box_id){
-              let box = state.boxes[action.box_id - 1]
-              box.content.push({
-                isSub:false,
-                main: action.text,
-                sub:[],
-                next: 0
-              });
-              box.active.main = box.content.length - 1;
-              box.sub = 0;
+              let box = state.boxes[action.box_id - 1];
+              box.active.main = ad.length - 1;
+              box.active.sub = 0;
             }else{
               state.boxes.push(
                 {
                   id: box_id, 
                   action: 'ad',
-                  active:{ main:0, sub:0},
-                  content:[
-                    {
-                      isSub: false,
-                      main:action.text,
-                      sub: [],
-                      next: 0
-                    }, 
-                  ],
+                  active:{ main:ad.length - 1, sub:0},
+                  cases:[ ],
+                  
+                });
+              if(box_id - 1){
+                if(state.boxes[action.prev_box_id - 1].action == 'hs'){
+                  let active = state.boxes[action.prev_box_id - 1].active;
+                  state.boxes[action.prev_box_id - 1].cases[active].next = box_id;
+                }else{
+                  state.boxes[action.prev_box_id - 1].next = box_id;
+                }
+              }
+            }
+
+            return state;
+
+          case AD_SUB_ADD:
+            let box = state.boxes[action.box_id - 1];
+            state.ad[action.main_idx].sub.push(action.text);
+
+            box.active.sub = state.ad[action.main_idx].sub.length - 1;
+
+            return state;
+
+          case AD_MAIN_SELECT:
+            if(action.box_id){
+              let box = state.boxes[action.box_id - 1]
+              box.active.main = action.main_idx;
+              box.active.sub = 0;
+            }else{
+              state.boxes.push(
+                {
+                  id: box_id, 
+                  action: 'ad',
+                  active:{ main:action.main_idx, sub:0},
+                  cases:[ ],
                   
                 });
               if(box_id - 1){
@@ -471,25 +515,6 @@
               }
             }
             
-
-            return state;
-
-          case AD_SUB_ADD:
-            let box = state.boxes[action.box_id - 1]
-            box.content[action.main_idx].sub.push({
-              content: action.text,
-              next: 0
-            });
-
-            box.content[action.main_idx].isSub = true;
-            box.active.sub = box.content[action.main_idx].sub.length - 1;
-
-            return state;
-
-          case AD_MAIN_SELECT:
-            state.boxes[action.box_id - 1].active.main = action.main_idx;
-            state.boxes[action.box_id - 1].active.sub = 0;
-
             return state;
 
           case AD_SUB_SELECT:
@@ -526,30 +551,7 @@
       $("#create_test").click(() =>
         {
           let str = JSON.stringify(store.getState().boxes);
-
           alert(str);
-          
-          // str = str.replace(/"/g, "\\\"");
-          // str = str.replace(/[\?\!\.\']/g, " ");
-          
-          // var ajax_object = {"ajax_url":"http:\/\/noiman.com/\/wp-admin\/admin-ajax.php"};
-
-          
-          // jQuery.ajax({
-          //     type: 'GET',
-          //     url: ajax_object.ajax_url,
-          //     data:{
-          //       'action':'hello', 
-          //       'param':store.getState().boxes
-          //     },
-          //     beforeSend: function() {
-          //       $("#overlay").fadeIn(300);
-          //     },
-          //     success: function(response) {
-          //       $("#overlay").fadeOut(300, function(){alert("result: " + response);});
-          //     }
-          // });
-
         }
       );
 
@@ -604,8 +606,7 @@
         }
         
       });
-
-      
+  
 
 
       /***********AS**********/
@@ -682,24 +683,26 @@
           $('.ad-item').remove();
           $('.ad-new-input').remove();
 
+          let items = store.getState().ad;
           let box_id = $(this).parent().attr('box_id');
+          let cases = box_id ? store.getState().boxes[box_id - 1].cases : [];
+          let active = [];
+          $.each(cases, function(index, item){
+            active.push(Number(item.id.split("_")[0]));
+          })
 
-          if(box_id){
-            ad = store.getState().boxes[box_id - 1].content;
-
-            $.each(ad, function (index, item){
-              
-              $('.ad-new-btn').before('<div class="ad-item" idx="' + ad.indexOf(item) + '">' +
-                                      '<input readonly="readonly" value="' + item.main + '">' + 
-                                      '<div>' + 
-                                        '<!--<button class="edit">Edit</button> -->' + 
-                                        '<!--<button class="delete">Delete</button>-->' +
-                                      '</div>' +
+          $.each(items, function (index, item){
+            if(active.includes(index)){
+              $('.ad-new-btn').before('<div class="ad-item" idx="' + items.indexOf(item) + '">' +
+                                      '<input readonly="readonly" class="isflow" value="' + item.main + '">' + 
                                     '</div>');
-            });
-          }
-
-          
+            }else{
+              $('.ad-new-btn').before('<div class="ad-item" idx="' + items.indexOf(item) + '">' +
+                                      '<input readonly="readonly" value="' + item.main + '">' + 
+                                    '</div>');
+            }
+            
+          });
 
           let offset = $(this).offset();
           let dropdown = $('#ad-dropdown');
@@ -716,30 +719,29 @@
           $('.sub-ad-item').remove();
           $('.sub-ad-new-input').remove();
 
-          
+          let items = store.getState().ad;
+          let box_id = $(this).parent().attr('box_id');
+          let main_idx = $(this).parent().find('.main').attr('idx');
+          let cases = box_id ? store.getState().boxes[box_id - 1].cases : [];
+          let active = [];
+          $.each(cases, function(index, item){
+            if(item.id.startsWith(main_idx)){
+              active.push(Number(item.id.split("_")[1]));
+            }
+          })
 
           if($(this).parent().find('.main').attr('idx') + 1){
-            let items = store.getState().boxes[$(this).parent().attr('box_id') - 1].content[$(this).parent().find('.main').attr('idx')].sub;
+            let items = store.getState().ad[$(this).parent().find('.main').attr('idx')].sub;
 
             $.each(items, function (index, item){
               
-              /*
-              $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + items.indexOf(item) + '">' +
-                                      '<input readonly="readonly" value="' + item.content + '">' + 
-                                      '<div>' + 
-                                        '<!--<button class="edit">Edit</button> -->' + 
-                                        '<!--<button class="delete">Delete</button>-->' +
-                                      '</div>' +
-                                    '</div>');
-              */
-
-              if(item.next){
+              if(active.includes(index)){
                 $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + items.indexOf(item) + '">' +
-                                      '<input readonly="readonly" class="isflow" value="' + item.content + '">' + 
+                                      '<input readonly="readonly" class="isflow" value="' + item + '">' + 
                                     '</div>');
               }else{
                 $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + items.indexOf(item) + '">' +
-                                      '<input readonly="readonly" value="' + item.content + '">' + 
+                                      '<input readonly="readonly" value="' + item + '">' + 
                                     '</div>');
               }
             });
@@ -773,12 +775,12 @@
 
       $(document).on('click', '#ad-dropdown .ad-item input', function(e){
         if($(this).attr('readonly') == 'readonly'){
-
+          let prev_box_id = selected_input.parent().parent('.alexa-row').prev().find('.box').attr('box_id');
           let box_id = selected_input.parent().attr('box_id');
           let idx = $(this).parent().attr('idx');
           $('#ad-dropdown').slideUp();
 
-          store.dispatch(ad_main_select(box_id, idx));
+          store.dispatch(ad_main_select(prev_box_id, box_id, idx));
         }
       });
 
@@ -901,12 +903,14 @@
           }else if(action == 'ad'){
             let text = box.content;
             createRow(row_id, box_id, box, action, text);
-            let ad = store.getState().boxes[box_id - 1];
-            if(ad.content[ad.active.main].isSub){
-              box_id = ad.content[ad.active.main].sub[ad.active.sub].next;
-            }else{
-              box_id = ad.content[ad.active.main].next;
-            }
+            let cases = box.cases;
+            let active_case = box.active.main + '_' + box.active.sub;
+            box_id = 0;
+            $.each(cases, function (index, item){
+              if(item.id == active_case){
+                  box_id = item.next;
+              }
+            });
             
           }else{
             let text = box.content;
@@ -949,11 +953,11 @@
             row = row_start + id_input + empty_input + '<input class="as alexa-box box" type="text" value="' + text + '" box_id="' + box_id + '"  idx="0">' + empty_input + row_end;
             break;
           case 'ad':
-            let ad = store.getState().boxes[box_id - 1];
-            let maintext = ad.content[ad.active.main].main;
+            let ad = store.getState().ad;
+            let maintext = ad[box.active.main].main;
             let subtext;
-            if(ad.content[ad.active.main].isSub){
-              subtext = ad.content[ad.active.main].sub[ad.active.sub].content;
+            if(ad[box.active.main].sub.length){
+              subtext = ad[box.active.main].sub[box.active.sub];
             }else{
               subtext = '';
             }
@@ -962,9 +966,6 @@
         }
         $('.alexa-section').append(row);
       }
-
-
-
 
     });
   </script>
