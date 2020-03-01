@@ -347,15 +347,13 @@
                   let main_text = ad[main].main;
                   let sub_text = ad[main].sub[sub];
                   prev_box.cases.push({
-                    id: main + '_' + sub,
                     content: [main_text, sub_text],
                     next: box_id,
                   });
                 }else{
                   let main_text = ad[main].main;
                   prev_box.cases.push({
-                    id: main + '_0',
-                    content: [main_text],
+                    content: [main_text, main_text],
                     next: box_id,
                   });
 
@@ -395,8 +393,10 @@
               {
                 id: box_id, 
                 action: 'as',
-                content: action.text,
-                next: 0
+                cases:[{
+                  content: action.text,
+                  next: 0
+                }]
               });
             if(box_id - 1){
               if(state.boxes[action.prev_box_id - 1].action == 'hs'){
@@ -412,27 +412,23 @@
                   let main_text = ad[main].main;
                   let sub_text = ad[main].sub[sub];
                   prev_box.cases.push({
-                    id: main + '_' + sub,
                     content: [main_text, sub_text],
                     next: box_id,
                   });
                 }else{
                   let main_text = ad[main].main;
                   prev_box.cases.push({
-                    id: main + '_0',
-                    content: [main_text],
+                    content: [main_text, main_text],
                     next: box_id,
                   });
-
                 }
-                
               }
             }
             return state;
 
           case AS_BOX_EDIT:
 
-            state.boxes[action.box_id - 1].content = action.text;
+            state.boxes[action.box_id - 1].cases[0].content = action.text;
             return state;
 
           case AS_SELECT:
@@ -441,13 +437,24 @@
               state.boxes[action.prev_box_id - 1].cases[active].next = action.box_id;
             }else{
               let prev_box = state.boxes[action.prev_box_id - 1];
-              let main = prev_box.main;
-              if(state.ad[main].isSub){
-                let sub = prev_box.sub;
-                state.ad[main].sub[sub].next = action.box_id;
-              }else{
-                state.ad[main].next = action.box_id;
-              }
+                let main = prev_box.active.main;
+                let sub = prev_box.active.sub;
+                let ad = state.ad;
+                if(ad[main].sub.length){
+                  let sub = prev_box.active.sub;
+                  let main_text = ad[main].main;
+                  let sub_text = ad[main].sub[sub];
+                  prev_box.cases.push({
+                    content: [main_text, sub_text],
+                    next: action.box_id,
+                  });
+                }else{
+                  let main_text = ad[main].main;
+                  prev_box.cases.push({
+                    content: [main_text, main_text],
+                    next: action.box_id,
+                  });
+                }
             }
             return state;
 
@@ -467,7 +474,7 @@
                 {
                   id: box_id, 
                   action: 'ad',
-                  active:{ main:ad.length - 1, sub:0},
+                  active:{ main:ad.length - 1, sub:'n'},
                   cases:[ ],
                   
                 });
@@ -493,15 +500,18 @@
 
           case AD_MAIN_SELECT:
             if(action.box_id){
-              let box = state.boxes[action.box_id - 1]
+              let box = state.boxes[action.box_id - 1];
+              let sub = state.ad[action.main_idx].sub.length ? 0 : 'n';
               box.active.main = action.main_idx;
-              box.active.sub = 0;
+              box.active.sub = sub;
             }else{
+              let sub = state.ad[action.main_idx].sub.length ? 0 : 'n';
+
               state.boxes.push(
                 {
                   id: box_id, 
                   action: 'ad',
-                  active:{ main:action.main_idx, sub:0},
+                  active:{ main:action.main_idx, sub: sub},
                   cases:[ ],
                   
                 });
@@ -619,7 +629,7 @@
 
           $.each(items, function (index, item){
             if(item.action == 'as'){
-                alexa_contents.push({box_id: item.id, content:item.content});
+                alexa_contents.push({box_id: item.id, content:item.cases[0].content});
             }
           });
 
@@ -683,22 +693,20 @@
           $('.ad-item').remove();
           $('.ad-new-input').remove();
 
-          let items = store.getState().ad;
+          let items = store.getState().ad.map(item => item.main);
           let box_id = $(this).parent().attr('box_id');
           let cases = box_id ? store.getState().boxes[box_id - 1].cases : [];
-          let active = [];
-          $.each(cases, function(index, item){
-            active.push(Number(item.id.split("_")[0]));
-          })
+          let active = cases.map(item => item.content[0]);
+          active = $.unique(active);
 
           $.each(items, function (index, item){
-            if(active.includes(index)){
+            if(active.includes(item)){
               $('.ad-new-btn').before('<div class="ad-item" idx="' + items.indexOf(item) + '">' +
-                                      '<input readonly="readonly" class="isflow" value="' + item.main + '">' + 
+                                      '<input readonly="readonly" class="isflow" value="' + item + '">' + 
                                     '</div>');
             }else{
               $('.ad-new-btn').before('<div class="ad-item" idx="' + items.indexOf(item) + '">' +
-                                      '<input readonly="readonly" value="' + item.main + '">' + 
+                                      '<input readonly="readonly" value="' + item + '">' + 
                                     '</div>');
             }
             
@@ -723,19 +731,15 @@
           let box_id = $(this).parent().attr('box_id');
           let main_idx = $(this).parent().find('.main').attr('idx');
           let cases = box_id ? store.getState().boxes[box_id - 1].cases : [];
-          let active = [];
-          $.each(cases, function(index, item){
-            if(item.id.startsWith(main_idx)){
-              active.push(Number(item.id.split("_")[1]));
-            }
-          })
+          let active = cases.map(item => item.content[1]);
+          active = $.unique(active);
 
           if($(this).parent().find('.main').attr('idx') + 1){
             let items = store.getState().ad[$(this).parent().find('.main').attr('idx')].sub;
 
             $.each(items, function (index, item){
               
-              if(active.includes(index)){
+              if(active.includes(item)){
                 $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + items.indexOf(item) + '">' +
                                       '<input readonly="readonly" class="isflow" value="' + item + '">' + 
                                     '</div>');
@@ -901,19 +905,18 @@
             createRow(row_id, box_id,  box, action, text);
             box_id = box.cases[active].next;
           }else if(action == 'ad'){
-            let text = box.content;
-            createRow(row_id, box_id, box, action, text);
             let cases = box.cases;
-            let active_case = box.active.main + '_' + box.active.sub;
-            box_id = 0;
-            $.each(cases, function (index, item){
-              if(item.id == active_case){
-                  box_id = item.next;
-              }
-            });
+            let ad = store.getState().ad;
+            let cur_main = ad[box.active.main];
+            let main_text = cur_main.main;
+            let sub_text = box.active.sub == 'n' ? main_text : cur_main.sub[box.active.sub];
+            let text = [main_text, sub_text];
+            createRow(row_id, box_id, box, action, text);
+            let cur_case = box.cases.find(item => JSON.stringify(item.content) == JSON.stringify(text));
+            box_id = cur_case ? cur_case.next : 0;
             
           }else{
-            let text = box.content;
+            let text = box.cases[0].content;
             createRow(row_id, box_id, box, action, text);
             box_id = box.next;
           }
@@ -954,13 +957,13 @@
             break;
           case 'ad':
             let ad = store.getState().ad;
-            let maintext = ad[box.active.main].main;
-            let subtext;
-            if(ad[box.active.main].sub.length){
-              subtext = ad[box.active.main].sub[box.active.sub];
-            }else{
-              subtext = '';
-            }
+            let maintext = text[0];
+            let subtext = text[1];
+            // if(ad[box.active.main].sub.length){
+            //   subtext = ad[box.active.main].sub[box.active.sub];
+            // }else{
+            //   subtext = '';
+            // }
             row = row_start + id_input + empty_input + empty_input + '<div class="alexa-box box" idx="0" ' + '" box_id="' + box_id + '"><input readonly="readonly"  class="ad alexa-box main" type="text" value="' + maintext + '"  idx="' + box.active.main + '"><input readonly="readonly"  class="ad alexa-box sub" type="text" value="' + subtext + '" idx="' + box.active.sub + '"></div>' + row_end;
             break;
         }
