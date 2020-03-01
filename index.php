@@ -367,15 +367,13 @@ get_header(); ?>
                   let main_text = ad[main].main;
                   let sub_text = ad[main].sub[sub];
                   prev_box.cases.push({
-                    id: main + '_' + sub,
                     content: [main_text, sub_text],
                     next: box_id,
                   });
                 }else{
                   let main_text = ad[main].main;
                   prev_box.cases.push({
-                    id: main + '_0',
-                    content: [main_text],
+                    content: [main_text, main_text],
                     next: box_id,
                   });
 
@@ -434,14 +432,13 @@ get_header(); ?>
                   let main_text = ad[main].main;
                   let sub_text = ad[main].sub[sub];
                   prev_box.cases.push({
-                    content: [main_text, main_text],
+                    content: [main_text, sub_text],
                     next: box_id,
                   });
                 }else{
                   let main_text = ad[main].main;
                   prev_box.cases.push({
-                    id: main + '_0',
-                    content: [main_text],
+                    content: [main_text, main_text],
                     next: box_id,
                   });
 
@@ -775,7 +772,6 @@ get_header(); ?>
           $('.sub-ad-item').remove();
           $('.sub-ad-new-input').remove();
 
-          
           let items = store.getState().ad;
           let box_id = $(this).parent().attr('box_id');
           let main_idx = $(this).parent().find('.main').attr('idx');
