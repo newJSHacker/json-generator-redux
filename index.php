@@ -1,6 +1,6 @@
 <?php
 /*
- * Template Name: Dialog System (Redux)
+ * Template Name: Dialog System (Redux-5)
  *
  *
  * */
@@ -36,6 +36,7 @@ get_header(); ?>
     }
     .alexa-section{
       height: auto;
+      padding-bottom:100px;
       min-height: calc(100vh - 640px);
       background: #202a34;
       overflow-y: auto;
@@ -188,16 +189,18 @@ get_header(); ?>
       		padding-left:0px;
             text-align:center;
     	}
+    }
 
-      .sub-ad-item input{
-        padding-left:5px;
-        border: none;
-        background: gray;
-      }
+    .sub-ad-item input{
+      padding:5px 10px;
+      border: none;
+      background: #bdbdbd;
+      color:#777777;
     }
 
     input.isflow{
-      background: green;
+      background: #202a34;
+      color:#fff;
     }
 
     #overlay{ 
@@ -379,7 +382,7 @@ get_header(); ?>
 
                 }
               }else{
-                state.boxes[action.prev_box_id - 1].next = box_id;
+                state.boxes[action.prev_box_id - 1].cases[0].next = box_id;
               }
                 
             }
@@ -490,7 +493,7 @@ get_header(); ?>
             if(action.box_id){
               let box = state.boxes[action.box_id - 1];
               box.active.main = ad.length - 1;
-              box.active.sub = 0;
+              box.active.sub = 'n';
             }else{
               state.boxes.push(
                 {
@@ -505,7 +508,7 @@ get_header(); ?>
                   let active = state.boxes[action.prev_box_id - 1].active;
                   state.boxes[action.prev_box_id - 1].cases[active].next = box_id;
                 }else{
-                  state.boxes[action.prev_box_id - 1].next = box_id;
+                  state.boxes[action.prev_box_id - 1].cases[0].next = box_id;
                 }
               }
             }
@@ -523,11 +526,12 @@ get_header(); ?>
           case AD_MAIN_SELECT:
             if(action.box_id){
               let box = state.boxes[action.box_id - 1];
-              let sub = state.ad[action.main_idx].sub.length ? 0 : 'n';
+              // let sub = state.ad[action.main_idx].sub.length ? 0 : 'n';
+              let sub = 'n';
               box.active.main = action.main_idx;
               box.active.sub = sub;
             }else{
-              let sub = state.ad[action.main_idx].sub.length ? 0 : 'n';
+              let sub = 'n';
 
               state.boxes.push(
                 {
@@ -542,7 +546,7 @@ get_header(); ?>
                   let active = state.boxes[action.prev_box_id - 1].active;
                   state.boxes[action.prev_box_id - 1].cases[active].next = box_id;
                 }else{
-                  state.boxes[action.prev_box_id - 1].next = box_id;
+                  state.boxes[action.prev_box_id - 1].cases[0].next = box_id;
                 }
               }
             }
@@ -582,7 +586,43 @@ get_header(); ?>
 
       $("#create_test").click(() =>
         {
-          let str = JSON.stringify(store.getState().boxes);
+          let boxes = store.getState().boxes;
+          let ad = store.getState().ad;
+          let main_text;
+          let sub_text;
+          boxes.map( box => {
+            if(box.action == 'ad' && box.cases.length == 0){
+              main_text = ad[box.active.main].main;
+              if(box.active.sub != 'n'){
+                sub_text = ad[box.active.main].sub[box.active.sub]
+              }else{
+                sub_text = main_text;
+              }
+              box.cases.push({
+                content: [main_text, sub_text],
+                next: 0
+              });
+              return box;
+            }else{
+              return box;
+            }
+          });
+		  
+		   boxes.map( box => {
+            if(box.action == 'ad' && box.cases.length == 1 && box.cases[0].next == 0){
+              main_text = ad[box.active.main].main;
+              if(box.active.sub != 'n'){
+                sub_text = ad[box.active.main].sub[box.active.sub]
+              }else{
+                sub_text = main_text;
+              }
+              box.cases[0].content = [main_text, sub_text];
+              return box;
+            }else{
+              return box;
+            }
+          })
+          let str = JSON.stringify(boxes);
 
 
           
@@ -670,10 +710,14 @@ get_header(); ?>
         if( $('#as-dropdown').css('display') == 'none'){
           $('#as-dropdown').html('');
           let items = store.getState().boxes;
+          let cur_boxes = [];
+          $(".as.box:not('.new')").each((index, item) => 
+            cur_boxes.push(Number(item.attributes.box_id.value))
+            );
           alexa_contents = [];
 
           $.each(items, function (index, item){
-            if(item.action == 'as'){
+            if(item.action == 'as' && !cur_boxes.includes(item.id)){
                 alexa_contents.push({box_id: item.id, content:item.cases[0].content});
             }
           });
@@ -963,7 +1007,7 @@ get_header(); ?>
           }else{
             let text = box.cases[0].content;
             createRow(row_id, box_id, box, action, text);
-            box_id = box.next;
+            box_id = box.cases[0].next;
           }
           
           ++ row_id;
