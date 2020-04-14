@@ -13,7 +13,9 @@
       background: #334453;
     }
     .alexa-header{
-      height: 70px;
+      background: #253443;
+      min-height: 140px;
+      height:auto;
       padding-top: 12px;
       color: #fff;
       font-size: 30px;
@@ -22,6 +24,7 @@
       color: #fff;
     }
     .alexa-footer{
+      background: #253443;
       height: 70px;
       padding-top: 15px;
     }
@@ -30,7 +33,7 @@
       min-height: calc(100vh - 240px);
       background: #202a34;
       overflow-y: auto;
-      /*position: relative;*/
+     
     }
 
     .alexa-row{
@@ -41,11 +44,11 @@
 
     .row-id{
       width: 50px;
-      height: 50px;
+      height: 50px !important;
       text-align: center;
       background: #324255;
       border: none;
-      border-radius: 50%;
+      border-radius: 50% !important;
       color: #fff;
       text-align: center;
     }
@@ -74,11 +77,12 @@
     }
     
     #hs-dropdown, #as-dropdown, #ad-dropdown, #sub-ad-dropdown{
+      z-index:9;
       display: none;
       width: 28%;
       background: #8492af;
       position: absolute;
-      /*border: 1px solid #000;*/
+      
       border-radius: 3px;
       padding: 10px 5px;
       box-shadow: 5px 5px 10px;
@@ -107,7 +111,7 @@
       margin-left: 10px;
     }
     #hs-items, #as-items, #ad-items{
-      /*border-bottom: 1px solid #000;*/
+     
     }
     .hs-item, .as-item, .ad-item, .sub-ad-item{
       padding: 2px 0;
@@ -155,19 +159,53 @@
     .ad-item input, .ad-new-input, .sub-ad-item input, .sub-ad-new-input{
       width: 100%;
     }
+    
+    
+    
+    @media screen and (max-width:768px) {
+    
+    	.alexa-section{
+        	padding-bottom:80px;
+        }
+    	.alexa-header{
+        	min-height:50px;
+            height:auto;
+            font-size:16px;            
+        }
+        
+        .alexa-row {
+        	margin-bottom:0px;
+        }
+        
+    	.row-id{
+      		width: 30px;
+     		height: 30px !important;      		
+    	}
+
+    	.alexa-box{
+      		width: 29%;
+      		height: 30px !important;
+      		padding-left:0px;
+            text-align:center;
+    	}
+    }
 
     .sub-ad-item input{
-      padding-left:5px;
+      padding:5px 10px;
       border: none;
+      background: #bdbdbd;
+      color:#777777;
     }
 
     input.isflow{
-      background: green;
+      background: #202a34;
+      color:#fff;
     }
 
     #overlay{ 
       position: fixed;
       top: 0;
+      left:0;
       z-index: 100;
       width: 100%;
       height:100%;
@@ -197,21 +235,105 @@
       display:none;
     }
 
+	.buttons {
+    	padding:10px;
+        display:flex;
+    }
+    
+   	.buttons .load-bot, .buttons .save-bot{
+   		display:flex;
+   	}
+    
+    .buttons input{
+    	width:50%;
+        font-size:16px;
+        line-height:1.2;
+        padding:5px;
+    }
+        
+    .buttons button, .buttons a {
+    	font-size:20px;
+        font-weight:900;        
+        border-radius:3px;
+        margin-left:5px;
+    }
+    
+    .load-bot, .save-bot, #instruction, #buy-easybot {
+    	width:24%;
+        margin-right:1%;
+    }
+    
+    @media screen and (max-width:1023px) and (min-width:421px) {
+    	.buttons {
+        	display:inline-block;
+            width:100%;
+    	}
+        .buttons .load-bot, .buttons .save-bot, #instruction {
+            float:left;
+   		}
+        .buttons input{
+    		width:60%;
+        }
+     	.load-bot, .save-bot, #instruction, #buy-easybot {
+    		width:48%;
+        	margin:5px 1%;
+    	}
+    }
+    @media screen and (max-width:420px) {
+    	.buttons {
+        	display:inline-block;
+            width:100%;
+    	}
+        .buttons .load-bot, .buttons .save-bot{
+            justify-content:space-between;
+   		}
+        .buttons input{
+    		width:65%;
+        }
+     	.load-bot, .save-bot, #instruction, #buy-easybot {
+    		width:96%;
+            margin:10px 2%;
+    	}
+        #instruction {
+        	display:inline-block;
+        }
+    }
     
   </style>
 </head>
 
 <body class = "alexa-body">
+    <div id="overlay">
+      <div class="cv-spinner">
+        <span class="spinner"></span>
+      </div>
+    </div>
 
   <div class="">
 
+    <input id="user_id" value="easybot_user" hidden />
+	
     <header class="alexa-header">
-
+	  <div class="top-bar" style="border-bottom:solid 2px #555; background:#232323;">
+      	<div class="buttons">
+        	<div class="load-bot">
+            	<input id="loading_bot_id" class="load-id" type="text"></input>
+            	<button id="load_btn" class="loading" style="background:#ffaa00;">Load ID</button>
+            </div>
+            <div class="save-bot">
+            	<input id="save_bot_id" class="save-id" type="text"></input>
+              <input id="save_flag" type="text" value="" hidden/>
+            	<button id="save_bot_btn" class="saving" style="background:grey; color:#999;">Save ID</button>
+            </div>
+        	<a id="instruction" style="background:#fff; color:#ff7700; border:solid 2px #ff7700; text-align: center; align-self: center; padding: 6px;" href="" target="[_blank]">How to use Bot?</a>
+        	<button id="buy-easybot" class="buy-bot" style="background:#ff7700; padding:6px;">Buy easyBot</button>
+        </div>
+      </div>
       <div class="alexa-row">
         <div class="row-id" style="visibility: hidden;"></div>
-        <div class="alexa-box">Human says:</div>
-        <div class="alexa-box">Alexa says:</div>
-        <div class="alexa-box">Alexa does:</div>
+        <div class="alexa-box">Human Says:</div>
+        <div class="alexa-box">Al Says:</div>
+        <div class="alexa-box">Al Does:</div>
       </div>
 
     </header>
@@ -236,17 +358,11 @@
       <div class="row">
         <div class="col-8"></div>
         <div class="col-4 ">
-          <button id="create_test" class="btn btn-primary btn-lg" style="">Create and Test Skill</button>
+          <button id="create_test" class="btn btn-primary btn-lg" style="display:block; margin:0 auto;">Execute</button>
         </div>
       </div>
 
     </footer>
-
-    <div id="overlay">
-      <div class="cv-spinner">
-        <span class="spinner"></span>
-      </div>
-    </div>
     
   </div>
 
@@ -256,6 +372,7 @@
   
   <script>
     jQuery(document).ready(function ($) {
+
 
       const HS_NEW_BOX = 'HS_NEW_BOX';
       const HS_BOX_ADD = 'HS_BOX_ADD';
@@ -275,8 +392,7 @@
       const AD_MAIN_SELECT = 'AD_MAIN_SELECT';
       const AD_SUB_SELECT = 'AD_SUB_SELECT';
 
-      const IS_LOADING = 'IS_LOADING';
-      const NO_LOADING = 'NO_LOADING';
+      const LOAD_BOT = 'LOAD_BOT';
 
 
       const hs_new_box = (text, prev_box_id) => ({type:HS_NEW_BOX, text: text, prev_box_id: prev_box_id});
@@ -297,6 +413,8 @@
       const ad_main_select = (prev_box_id, box_id, main_idx) =>({type: AD_MAIN_SELECT,prev_box_id: prev_box_id, main_idx: main_idx, box_id: box_id});
       const ad_sub_select = (box_id, sub_idx) =>({type: AD_SUB_SELECT, box_id: box_id, sub_idx: sub_idx});
 
+      const load_bot = (bot) => ({type: LOAD_BOT, bot: bot})
+
       const initialState = {
         boxes:[],
         ad:[
@@ -314,6 +432,10 @@
           }
         ],
       };
+
+      let virtual_bot = {"boxes":[{"id":1,"action":"hs","active":0,"cases":[{"content":"Hi, there?","next":2}]},{"id":2,"action":"as","cases":[{"content":"I'm here","next":3}]},{"id":3,"action":"hs","active":"1","cases":[{"content":"Please turn on light","next":4},{"content":"How are you?","next":7}]},{"id":4,"action":"ad","active":{"main":"0","sub":"0"},"cases":[{"content":["light","light on"],"next":5}]},{"id":5,"action":"hs","active":0,"cases":[{"content":"Thank you","next":6}]},{"id":6,"action":"as","cases":[{"content":"My pleasure","next":0}]},{"id":7,"action":"as","cases":[{"content":"I'm fine, and you?","next":8}]},{"id":8,"action":"hs","active":0,"cases":[{"content":"Me too. Can you hear me music?","next":9}]},{"id":9,"action":"as","cases":[{"content":"no problem","next":10}]},{"id":10,"action":"ad","active":{"main":"2","sub":0},"cases":[{"content":["music streaming","music on"],"next":11}]},{"id":11,"action":"hs","active":0,"cases":[{"content":"Great","next":0}]}],"ad":[{"main":"light","sub":["light on","light off"]},{"main":"Color","sub":["White","Black"]},{"main":"music streaming","sub":["music on"]}]};
+
+      let current_bot_id = '';
 
       const counter = (state = initialState, action) => {
 
@@ -421,7 +543,9 @@
                     content: [main_text, main_text],
                     next: box_id,
                   });
+
                 }
+                
               }
             }
             return state;
@@ -533,6 +657,10 @@
 
             return state;
 
+          case LOAD_BOT:        
+            state = action.bot;
+			return state;
+
           default:
             return state;
         }
@@ -561,11 +689,11 @@
 
       $("#create_test").click(() =>
         {
-          let boxes = store.getState().boxes;
+          let state = store.getState();
           let ad = store.getState().ad;
           let main_text;
           let sub_text;
-          boxes.map( box => {
+          state.boxes.map( box => {
             if(box.action == 'ad' && box.cases.length == 0){
               main_text = ad[box.active.main].main;
               if(box.active.sub != 'n'){
@@ -583,7 +711,7 @@
             }
           });
 		  
-		   boxes.map( box => {
+		      state.boxes.map( box => {
             if(box.action == 'ad' && box.cases.length == 1 && box.cases[0].next == 0){
               main_text = ad[box.active.main].main;
               if(box.active.sub != 'n'){
@@ -597,8 +725,68 @@
               return box;
             }
           })
-          let str = JSON.stringify(boxes);
+          let str = JSON.stringify(state);
           alert(str);
+        }
+      );
+
+      $("#load_btn").click(() =>
+        {
+          let loading_bot_id = $('#loading_bot_id').val();
+          // jQuery.ajax({
+          //     type: 'GET',
+          //     url: ajax_object.ajax_url,
+          //     data:{
+          //       'action':'get_bot', 
+          //       'param':s
+          //     },
+          //     beforeSend: function() {
+          //       $("#overlay").fadeIn(300);
+          //     },
+          //     success: function(response) {
+          //       $("#overlay").fadeOut(300, function(){alert("result: " + response);});
+          //     },
+          //     error: function(){
+          //       $("#overlay").fadeOut(300, function(){alert("Try again");});
+          //     },
+          //     timeout: 30000
+          // });
+
+          store.dispatch(load_bot(virtual_bot));
+
+        }
+      );
+
+      $("#save_bot_btn").click(() =>
+        {
+
+          let save_bot_id = $('#save_bot_id').val();
+           
+          if($("#save_flag").val()){
+            alert("Saved save_bot_id");
+			      jQuery.ajax({
+               type: 'POST',
+               url: ajax_object.ajax_url,
+               data:{
+                action:'save_bot',
+                param:{
+				 	        bot_id: $("#bot_id").val(),
+					        save_bot_id: $("#save_bot_id").val()
+                },
+              },
+          
+               success: function(response) {
+                 $("#overlay").fadeOut(300, function(){alert("result: " + response);});
+               },
+               error: function(){
+                 $("#overlay").fadeOut(300, function(){alert("Try again");});
+               },
+               timeout: 30000
+           });
+          }else{
+            alert("You must pay!");
+          }
+          
         }
       );
 
