@@ -11,6 +11,7 @@
   <style>
     .alexa-body{
       background: #334453;
+      word-break: break-all;
     }
     .alexa-header{
       background: #253443;
@@ -36,131 +37,45 @@
      
     }
 
-    .alexa-row{
-      display: flex;
-      justify-content: space-around;
-      margin: 10px 0;
-    }
-
-    .row-id{
-      width: 50px;
-      height: 50px !important;
-      text-align: center;
-      background: #324255;
-      border: none;
-      border-radius: 50% !important;
-      color: #fff;
-      text-align: center;
-    }
-
-    .alexa-box, .hs-box input{
-      width: 27%;
-      height: 50px;
-      border: none;
-      border-radius: 4px;
-      padding-left: 10px;
-      color: #ffffff;
-    }
-    .hs-box{
-    	width: 27%;
-    }
-    .hs-box input{
-      width: 100%;
-      margin-bottom: 10px;
-    }
-    .hs-box input{
+    .hs-box div{
       background: #024242;
     }
 
-    .as, .ad, .hs-box input.active{
+    .hs-box div.active{
       background: #5384ff;
     }
-    
-    #hs-dropdown, #as-dropdown, #ad-dropdown, #sub-ad-dropdown{
-      z-index:9;
-      display: none;
-      width: 28%;
-      background: #8492af;
-      position: absolute;
-      
-      border-radius: 3px;
-      padding: 10px 5px;
-      box-shadow: 5px 5px 10px;
-    }
-    #as-dropdown p, #ad-dropdown p, #sub-ad-dropdown p, #hs-dropdown p{
-      margin: 0;
-      padding-left: 8px;
-      padding-right: 8px;
+
+    .remove_mark:hover{
+    	color: red;
+    	cursor: pointer ;
     }
 
-    #as-dropdown p:hover, #ad-dropdown p:hover,#sub-ad-dropdown p:hover, #hs-dropdown p:hover{
-      background: #65a8fe;
-      padding-left: 10px;
-      padding-right: 10px;
+    .bg1{
+    	background-color: #5384ff;
     }
-
-    input{
-      outline: none;
-    }
-
-    .add-input {
-      background: transparent;
-      border: 0;
-      
-      border-bottom: 1px solid #334453;
-      margin-left: 10px;
-    }
-    #hs-items, #as-items, #ad-items{
-     
-    }
-    .hs-item, .as-item, .ad-item, .sub-ad-item{
-      padding: 2px 0;
-      position: relative;
-    }
-    .drop-close{
-      float: right;
-    }
-    .human-delete{
-      position: absolute;
-      right: 0;
-    }
-
-    .hs-item:hover{
-      background: #d7d7d7;
-    }
-    .hs-item{
-      display: flex;
-      justify-content: space-between;
-    }
-    .hs-item button{
-      border: none;
-      background: none;
-      outline: none;
-    }
-    .hs-item button:hover{
-      color: red;
-      cursor: pointer;
-    }
-    .hs-item .edit{
-      color: green;
-    }
-    .hs-item .delete{
-      color: blue;
-    }
-    #hs-dropdown input{
-      background: none;
-      outline: none;
-      border: none;
-    }
-    .ad.alexa-box{
-      width: 40%;
-      margin-right: 5px;
-    }
-    .ad-item input, .ad-new-input, .sub-ad-item input, .sub-ad-new-input{
-      width: 100%;
+    .bg2{
+    	background-color: #024242;
     }
     
-    
+    #as-select p:hover, #ad-main-select p:hover, #ad-sub-select p:hover{
+    	background: #5384ff;
+    }
+
+    #as-select, #ad-main-select, #ad-sub-select{
+    	position: absolute;
+    	z-index: 9;
+    	border: 1px solid #202a34;
+    }
+
+    .w-5{
+    	width: 5%;
+    }
+    .w-95{
+    	width: 95%;
+    }
+    .w-30{
+    	width: 30%;
+    }
     
     @media screen and (max-width:768px) {
     
@@ -173,33 +88,6 @@
             font-size:16px;            
         }
         
-        .alexa-row {
-        	margin-bottom:0px;
-        }
-        
-    	.row-id{
-      		width: 30px;
-     		height: 30px !important;      		
-    	}
-
-    	.alexa-box{
-      		width: 29%;
-      		height: 30px !important;
-      		padding-left:0px;
-            text-align:center;
-    	}
-    }
-
-    .sub-ad-item input{
-      padding:5px 10px;
-      border: none;
-      background: #bdbdbd;
-      color:#777777;
-    }
-
-    input.isflow{
-      background: #202a34;
-      color:#fff;
     }
 
     #overlay{ 
@@ -230,9 +118,6 @@
       100% { 
         transform: rotate(360deg); 
       }
-    }
-    .is-hide{
-      display:none;
     }
 
 	.buttons {
@@ -299,6 +184,8 @@
         }
     }
     
+    
+
   </style>
 </head>
 
@@ -309,10 +196,8 @@
       </div>
     </div>
 
-  <div class="">
+  <div class="container">
 
-    <input id="user_id" value="easybot_user" hidden />
-	
     <header class="alexa-header">
 	  <div class="top-bar" style="border-bottom:solid 2px #555; background:#232323;">
       	<div class="buttons">
@@ -329,27 +214,18 @@
         	<button id="buy-easybot" class="buy-bot" style="background:#ff7700; padding:6px;">Buy easyBot</button>
         </div>
       </div>
-      <div class="alexa-row">
-        <div class="row-id" style="visibility: hidden;"></div>
-        <div class="alexa-box">Human Says:</div>
-        <div class="alexa-box">Al Says:</div>
-        <div class="alexa-box">Al Does:</div>
+      <div class="d-flex">
+        <div class="w-5"></div>
+        <div class="d-flex w-95 justify-content-between">
+	        <div class="w-30">Human Says:</div>
+	        <div class="w-30">Al Says:</div>
+	        <div class="w-30">Al Does:</div>
+	    </div>
       </div>
 
     </header>
 
     <section class="alexa-section">
-
-      <div id="as-dropdown" class="dropdown">
-      </div>
-
-      <div id="ad-dropdown" class="dropdown">
-        <p class="ad-new-btn"> + Add New </p>
-      </div>
-
-      <div id="sub-ad-dropdown" class="dropdown">
-        <p class="sub-ad-new-btn"> + Add New </p>
-      </div>
 
     </section>
 
@@ -378,10 +254,12 @@
       const HS_BOX_ADD = 'HS_BOX_ADD';
       const HS_BOX_EDIT = 'HS_BOX_EDIT';
       const HS_BOX_ACTIVE = 'HS_BOX_ACTIVE';
+      const HS_BOX_DELETE = 'HS_BOX_DELETE';
 
       const AS_NEW_BOX = 'AS_NEW_BOX';
       const AS_BOX_EDIT = 'AS_BOX_EDIT';
       const AS_SELECT = 'AS_SELECT';
+      const AS_BOX_DELETE = 'AS_BOX_DELETE';
 
       const AD_NEW_BOX = 'AD_NEW_BOX';
       const AD_BOX_EDIT = 'AD_BOX_EDIT';
@@ -392,6 +270,9 @@
       const AD_MAIN_SELECT = 'AD_MAIN_SELECT';
       const AD_SUB_SELECT = 'AD_SUB_SELECT';
 
+      const AD_MAIN_DELETE = 'AD_MAIN_DELETE';
+      const AD_SUB_DELETE = 'AD_SUB_DELETE';
+
       const LOAD_BOT = 'LOAD_BOT';
 
 
@@ -399,10 +280,12 @@
       const hs_box_add = (text, box_id) => ({type:HS_BOX_ADD, text: text, box_id:box_id});
       const hs_box_edit = (text, box_id, idx) => ({type:HS_BOX_EDIT, text: text, box_id:box_id, idx: idx});
       const hs_box_active = (box_id, idx) => ({type:HS_BOX_ACTIVE, box_id:box_id, idx: idx});
+      const hs_box_delete = (box_id, case_id, prev_box_id) => ({type:HS_BOX_DELETE, box_id:box_id, case_id: case_id, prev_box_id: prev_box_id});
 
       const as_new_box = (text, prev_box_id) => ({type:AS_NEW_BOX, text: text, prev_box_id: prev_box_id});
-      const as_box_edit = (box_id, text) => ({type:AS_BOX_EDIT, text: text, box_id:box_id});
+      const as_box_edit = (text, box_id) => ({type:AS_BOX_EDIT, text: text, box_id:box_id});
       const as_select = (box_id, prev_box_id) => ({type:AS_SELECT, box_id: box_id, prev_box_id:prev_box_id});
+      const as_box_delete = (box_id, prev_box_id) => ({type:AS_BOX_DELETE, box_id:box_id, prev_box_id: prev_box_id});
 
       const ad_new_box = (main, sub, prev_box_id) => ({type:AD_NEW_BOX, main: main, sub: sub , prev_box_id: prev_box_id});
       const ad_box_edit = (box_id, main, sub) => ({type: AD_BOX_EDIT, box_id: box_id, main: main, sub: sub});
@@ -412,6 +295,9 @@
 
       const ad_main_select = (prev_box_id, box_id, main_idx) =>({type: AD_MAIN_SELECT,prev_box_id: prev_box_id, main_idx: main_idx, box_id: box_id});
       const ad_sub_select = (box_id, sub_idx) =>({type: AD_SUB_SELECT, box_id: box_id, sub_idx: sub_idx});
+
+      const ad_main_delete = (box_id, main_id) => ({type: AD_MAIN_DELETE, box_id: box_id, main_id: main_id});
+      const ad_sub_delete = (box_id, main_id, sub_id) => ({type: AD_SUB_DELETE, box_id: box_id, main_id: main_id, sub_id: sub_id });
 
       const load_bot = (bot) => ({type: LOAD_BOT, bot: bot})
 
@@ -431,6 +317,7 @@
             sub:[],
           }
         ],
+        box_id: 1,
       };
 
       let virtual_bot = {"boxes":[{"id":1,"action":"hs","active":0,"cases":[{"content":"Hi, there?","next":2}]},{"id":2,"action":"as","cases":[{"content":"I'm here","next":3}]},{"id":3,"action":"hs","active":"1","cases":[{"content":"Please turn on light","next":4},{"content":"How are you?","next":7}]},{"id":4,"action":"ad","active":{"main":"0","sub":"0"},"cases":[{"content":["light","light on"],"next":5}]},{"id":5,"action":"hs","active":0,"cases":[{"content":"Thank you","next":6}]},{"id":6,"action":"as","cases":[{"content":"My pleasure","next":0}]},{"id":7,"action":"as","cases":[{"content":"I'm fine, and you?","next":8}]},{"id":8,"action":"hs","active":0,"cases":[{"content":"Me too. Can you hear me music?","next":9}]},{"id":9,"action":"as","cases":[{"content":"no problem","next":10}]},{"id":10,"action":"ad","active":{"main":"2","sub":0},"cases":[{"content":["music streaming","music on"],"next":11}]},{"id":11,"action":"hs","active":0,"cases":[{"content":"Great","next":0}]}],"ad":[{"main":"light","sub":["light on","light off"]},{"main":"Color","sub":["White","Black"]},{"main":"music streaming","sub":["music on"]}]};
@@ -439,15 +326,13 @@
 
       const counter = (state = initialState, action) => {
 
-        let box_id = state.boxes.length + 1;
-
         switch(action.type) {
 
           case HS_NEW_BOX:
 
             state.boxes.push(
               {
-                id: box_id, 
+                id: state.box_id, 
                 action: 'hs',
                 active: 0,
                 cases:[
@@ -458,9 +343,9 @@
                 ]
               });
 
-            if(box_id - 1){
-              if(state.boxes[action.prev_box_id - 1].action == 'ad'){
-                let prev_box = state.boxes[action.prev_box_id - 1];
+            if(state.box_id - 1){
+              if(getBox(state.boxes, action.prev_box_id).action == 'ad'){
+                let prev_box = getBox(state.boxes, action.prev_box_id);
                 let main = prev_box.active.main;
                 let sub = prev_box.active.sub;
                 let ad = state.ad;
@@ -470,62 +355,76 @@
                   let sub_text = ad[main].sub[sub];
                   prev_box.cases.push({
                     content: [main_text, sub_text],
-                    next: box_id,
+                    next: state.box_id,
                   });
                 }else{
                   let main_text = ad[main].main;
                   prev_box.cases.push({
                     content: [main_text, main_text],
-                    next: box_id,
+                    next: state.box_id,
                   });
 
                 }
               }else{
-                state.boxes[action.prev_box_id - 1].cases[0].next = box_id;
+                getBox(state.boxes, action.prev_box_id).cases[0].next = state.box_id;
               }
                 
             }
 
+            state.box_id++;
+
             return state;
 
           case HS_BOX_ADD:
-
-            state.boxes[action.box_id - 1].cases.push(
+            getBox(state.boxes, action.box_id).cases.push(
               {
                 content: action.text,
                 next: 0
               });
-
             return state;
 
           case HS_BOX_EDIT:
-
-            state.boxes[action.box_id - 1].cases[action.idx].content = action.text;
-
+            getBox(state.boxes, action.box_id).cases[action.idx].content = action.text;
             return state;
 
           case HS_BOX_ACTIVE:
-
-            state.boxes[action.box_id - 1].active = action.idx;
-
+            getBox(state.boxes, action.box_id).active = action.idx;
             return state;
+
+          case HS_BOX_DELETE:
+          	if(getBox(state.boxes, action.box_id).cases.length - 1){
+          		if(getBox(state.boxes, action.box_id).active == action.case_id) getBox(state.boxes, action.box_id).active = 0;
+          		else if(getBox(state.boxes, action.box_id).active > action.case_id) --getBox(state.boxes, action.box_id).active;
+          		getBox(state.boxes, action.box_id).cases.splice(action.case_id, 1);
+          	}else{
+          		if(action.box_id == 1){
+          			state = { boxes:[],
+				        ad:[
+				        ],
+				        box_id: 1,
+				      };
+          		}else{
+          			state.boxes = $.grep(state.boxes, function(e) { return e.id != action.box_id });
+          		}
+          	}
+          	return state;
 
           case AS_NEW_BOX:
             state.boxes.push(
               {
-                id: box_id, 
+                id: state.box_id, 
                 action: 'as',
                 cases:[{
                   content: action.text,
                   next: 0
                 }]
               });
-            if(box_id - 1){
-              if(state.boxes[action.prev_box_id - 1].action == 'hs'){
-                let active = state.boxes[action.prev_box_id - 1].active;
-                state.boxes[action.prev_box_id - 1].cases[active].next = box_id;
+            if(state.box_id - 1){
+              if(getBox(state.boxes, action.prev_box_id).action == 'hs'){
+                let active = getBox(state.boxes, action.prev_box_id).active;
+                getBox(state.boxes, action.prev_box_id).cases[active].next = state.box_id;
               }else{
-                let prev_box = state.boxes[action.prev_box_id - 1];
+                let prev_box = getBox(state.boxes, action.prev_box_id);
                 let main = prev_box.active.main;
                 let sub = prev_box.active.sub;
                 let ad = state.ad;
@@ -535,32 +434,33 @@
                   let sub_text = ad[main].sub[sub];
                   prev_box.cases.push({
                     content: [main_text, sub_text],
-                    next: box_id,
+                    next: state.box_id,
                   });
                 }else{
                   let main_text = ad[main].main;
                   prev_box.cases.push({
                     content: [main_text, main_text],
-                    next: box_id,
+                    next: state.box_id,
                   });
 
                 }
                 
               }
             }
+            state.box_id++;
             return state;
 
           case AS_BOX_EDIT:
 
-            state.boxes[action.box_id - 1].cases[0].content = action.text;
+            getBox(state.boxes, action.box_id).cases[0].content = action.text;
             return state;
 
           case AS_SELECT:
-            if(state.boxes[action.prev_box_id - 1].action == 'hs'){
-              let active = state.boxes[action.prev_box_id - 1].active;
-              state.boxes[action.prev_box_id - 1].cases[active].next = action.box_id;
+            if(getBox(state.boxes, action.prev_box_id).action == 'hs'){
+              let active = getBox(state.boxes, action.prev_box_id).active;
+              getBox(state.boxes, action.prev_box_id).cases[active].next = action.box_id;
             }else{
-              let prev_box = state.boxes[action.prev_box_id - 1];
+              let prev_box = getBox(state.boxes, action.prev_box_id);
                 let main = prev_box.active.main;
                 let sub = prev_box.active.sub;
                 let ad = state.ad;
@@ -581,6 +481,18 @@
                 }
             }
             return state;
+
+          case AS_BOX_DELETE:
+          	if(action.box_id == 1){
+          			state = { boxes:[],
+				        ad:[
+				        ],
+				        box_id: 1,
+				      };
+          		}else{
+          			state.boxes = $.grep(state.boxes, function(e) { return e.id != action.box_id });
+          		}
+          	return state;
 
           case AD_MAIN_ADD:
             
@@ -590,32 +502,32 @@
               sub:[],
             });
             if(action.box_id){
-              let box = state.boxes[action.box_id - 1];
+              let box = getBox(state.boxes, action.box_id);
               box.active.main = ad.length - 1;
               box.active.sub = 'n';
             }else{
               state.boxes.push(
                 {
-                  id: box_id, 
+                  id: state.box_id, 
                   action: 'ad',
                   active:{ main:ad.length - 1, sub:'n'},
                   cases:[ ],
                   
                 });
-              if(box_id - 1){
-                if(state.boxes[action.prev_box_id - 1].action == 'hs'){
-                  let active = state.boxes[action.prev_box_id - 1].active;
-                  state.boxes[action.prev_box_id - 1].cases[active].next = box_id;
+              if(state.box_id - 1){
+                if(getBox(state.boxes, action.prev_box_id).action == 'hs'){
+                  let active = getBox(state.boxes, action.prev_box_id).active;
+                  getBox(state.boxes, action.prev_box_id).cases[active].next = state.box_id;
                 }else{
-                  state.boxes[action.prev_box_id - 1].cases[0].next = box_id;
+                  getBox(state.boxes, action.prev_box_id).cases[0].next = state.box_id;
                 }
               }
             }
-
+            state.box_id++;
             return state;
 
           case AD_SUB_ADD:
-            let box = state.boxes[action.box_id - 1];
+            let box = getBox(state.boxes, action.box_id);
             state.ad[action.main_idx].sub.push(action.text);
 
             box.active.sub = state.ad[action.main_idx].sub.length - 1;
@@ -624,7 +536,7 @@
 
           case AD_MAIN_SELECT:
             if(action.box_id){
-              let box = state.boxes[action.box_id - 1];
+              let box = getBox(state.boxes, action.box_id);
               // let sub = state.ad[action.main_idx].sub.length ? 0 : 'n';
               let sub = 'n';
               box.active.main = action.main_idx;
@@ -634,28 +546,76 @@
 
               state.boxes.push(
                 {
-                  id: box_id, 
+                  id: state.box_id, 
                   action: 'ad',
                   active:{ main:action.main_idx, sub: sub},
                   cases:[ ],
                   
                 });
-              if(box_id - 1){
-                if(state.boxes[action.prev_box_id - 1].action == 'hs'){
-                  let active = state.boxes[action.prev_box_id - 1].active;
-                  state.boxes[action.prev_box_id - 1].cases[active].next = box_id;
+              if(state.box_id - 1){
+                if(getBox(state.boxes, action.prev_box_id).action == 'hs'){
+                  let active = getBox(state.boxes, action.prev_box_id).active;
+                  getBox(state.boxes, action.prev_box_id).cases[active].next = state.box_id;
                 }else{
-                  state.boxes[action.prev_box_id - 1].cases[0].next = box_id;
+                  getBox(state.boxes, action.prev_box_id).cases[0].next = state.box_id;
                 }
               }
             }
-            
+            state.box_id++;
             return state;
 
           case AD_SUB_SELECT:
-            state.boxes[action.box_id - 1].active.sub = action.sub_idx;
+            getBox(state.boxes, action.box_id).active.sub = action.sub_idx;
 
             return state;
+
+          case AD_MAIN_DELETE:
+          	if(getBox(state.boxes, action.box_id).cases.length - 1){
+          		del = state.ad[action.main_id].main;
+          		getBox(state.boxes, action.box_id).cases = $.grep(getBox(state.boxes, action.box_id).cases, function(e) { 
+          			let rslt = e.content[0] != del;
+          			return rslt;
+          		});
+          		if(!getBox(state.boxes, action.box_id).cases.length)
+          			state = { boxes:[],
+				        ad:[
+				        ],
+				        box_id: 1,
+				      };
+          	}else{
+          		if(action.box_id == 1){
+          			state = { boxes:[],
+				        ad:[
+				        ],
+				        box_id: 1,
+				      };
+          		}else{
+          			state.boxes = $.grep(state.boxes, function(e) { return e.id != action.box_id });
+          		}
+          	}
+          	return state;
+
+          case AD_SUB_DELETE:
+          	if(getBox(state.boxes, action.box_id).cases.length - 1){
+          		del = [state.ad[action.main_id].main, state.ad[action.main_id].sub[action.sub_id]];
+          		getBox(state.boxes, action.box_id).cases = $.grep(getBox(state.boxes, action.box_id).cases, function(e) { 
+          			console.log(e);
+          			let rslt = (e.content[0] != del[0]) || (e.content[1] != del[1]);
+          			return rslt;
+          		});
+          	}else{
+          		if(action.box_id == 1){
+          			state = { boxes:[],
+				        ad:[
+				        ],
+				        box_id: 1,
+				      };
+          		}else{
+          			state.boxes = $.grep(state.boxes, function(e) { return e.id != action.box_id });
+          		}
+          	}
+
+          	return state;
 
           case LOAD_BOT:        
             state = action.bot;
@@ -673,7 +633,7 @@
 
 
       const render = () => {
-        $('section .alexa-row').remove();
+        $('section .as-row').remove();
         if(!store.getState().boxes.length){
           newRow(1,'');
         }else{
@@ -711,7 +671,7 @@
             }
           });
 		  
-		      state.boxes.map( box => {
+		   state.boxes.map( box => {
             if(box.action == 'ad' && box.cases.length == 1 && box.cases[0].next == 0){
               main_text = ad[box.active.main].main;
               if(box.active.sub != 'n'){
@@ -770,8 +730,8 @@
                data:{
                 action:'save_bot',
                 param:{
-				 	        bot_id: $("#bot_id").val(),
-					        save_bot_id: $("#save_bot_id").val()
+				 	bot_id: $("#bot_id").val(),
+					save_bot_id: $("#save_bot_id").val()
                 },
               },
           
@@ -794,66 +754,81 @@
 
       /*******  HS ********/
 
-      $(document).on('click', '.add-new', function(){
-        if(!$('.new-input').length){
-          let len = $(this).parent().find('input').length;
-          $(this).before('<input type="text" class="new-input" idx="' + len + '">');
-        }
-        $('.new-input').focus();
-      });
-
-      $(document).on('change', '.hs-box input', function(){
+      $(document).on('change', '.hs-add-input', function(){
         
         let text = $(this).val();
         let hs_box = $(this).parent();
 
-        if($(this).hasClass('new-input')){ 
-          if(!$(this).parent().attr('box_id')){
-            let prev_box_id = $(this).parent().parent('.alexa-row').prev().find('.box').attr('box_id');
+        if(!$(this).parent().attr('box_id')){
+            let prev_box_id = $(this).closest('.as-row').prev().find('.box').attr('box_id');
             store.dispatch(hs_new_box(text, prev_box_id));
-          }else{
+        }else{
             let box_id = parseInt(hs_box.attr('box_id'));
             store.dispatch(hs_box_add(text, box_id));
-          }
-        }else{ 
-          let box_id = $(this).parent().attr('box_id');
-          let idx = $(this).attr('idx');
-          store.dispatch(hs_box_edit(text, box_id, idx));
         }
       });
+
+
 
       
-      $(document).on('click', '.hs-box input', function(e){
-        let box_id = $(this).parent().attr('box_id');
-        let idx = $(this).attr('idx');
-        let text = $(this).val().trim();
+      $(document).on('click', '.hs-case', function(e){
+      	if(!$(e.target).hasClass("remove_mark") && !$(e.target).hasClass("hs-case-edit")){
+      		let box_id = $(this).parent().attr('box_id');
+	        let idx = $(this).attr('idx');
+	        let text = $(this).val().trim();
 
-        let active = store.getState().boxes[box_id - 1].active;
-        if(active == idx ){
-          $(this).focus();
-        }else{
-          if(idx < store.getState().boxes[box_id - 1].cases.length){
-            store.dispatch(hs_box_active(box_id, idx));
-          }else{
-
-          }
-          
-        }
-        
+	        let active = getBox(store.getState().boxes, box_id).active;
+	        if( $(this).hasClass('active') ){
+	          let old = $(this).find('p').text();
+	          $(this).html('<input type="text" class="hs-case-edit" value="' + old + '">');
+	        }else{
+	          if(idx < getBox(store.getState().boxes, box_id).cases.length){
+	            store.dispatch(hs_box_active(box_id, idx));
+	          }else{
+	          	//
+	          }
+	        }
+      	}
       });
+
+      $(document).on('click', '.hs-case .remove_mark', function(e){
+      	
+	      	var r = confirm("Delete?");
+			if (r == true) {
+				let prev_box_id = $(this).closest('.as-row').prev().find('.box').attr('box_id');
+				let box_id = $(this).closest('.hs-box').attr('box_id');
+				let case_id = $(this).closest('.hs-case').attr('idx');
+				store.dispatch(hs_box_delete(box_id, case_id, prev_box_id));
+			}
+      });
+
+      $(document).on('change', '.hs-case-edit', function(){
+        let text = $(this).val();
+        let box_id = $(this).closest('.hs-box').attr('box_id');
+        let case_id = $(this).closest('.hs-case').attr('idx');
+
+        store.dispatch(hs_box_edit(text, box_id, case_id));
+      });
+
+
   
-
-
       /***********AS**********/
 
-      $(document).on('click', '.as', function(){
-        if( $('#as-dropdown').css('display') == 'none'){
-          $('#as-dropdown').html('');
+      $(document).on('change', '.as-add-input', function(){
+        let text = $(this).val();
+        let prev_box_id = $(this).closest('.as-row').prev().find('.box').attr('box_id');
+        store.dispatch(as_new_box(text, prev_box_id));
+      });
+
+      $(document).on('click', '.as-add-input', function(){
+        if( !$('#as-select').length){
+          $(this).after('<div id="as-select" class="bg-white w-100"></div>');
+          // $('#as-dropdown').html('');
           let items = store.getState().boxes;
           let cur_boxes = [];
-          $(".as.box:not('.new')").each((index, item) => 
-            cur_boxes.push(Number(item.attributes.box_id.value))
-            );
+          $(".as-box").each((index, item) => {
+          	if(item.hasAttribute('box_id')){cur_boxes.push(Number(item.attributes.box_id.value));}
+          });
           alexa_contents = [];
 
           $.each(items, function (index, item){
@@ -865,249 +840,193 @@
           alexa_contents = $.unique(alexa_contents);
 
           $.each(alexa_contents, function(index, text){
-            $('#as-dropdown').append('<p class="ad-item" idx="' + text.box_id + '">' + text.content + '</p>');
+            $('#as-select').append('<p class="m-0 px-3" idx="' + text.box_id + '">' + text.content + '</p>');
           });
 
-          let offset = $(this).offset();
-          let dropdown = $('#as-dropdown');
-          let width = $('.alexa-box').width();
-          dropdown.animate({top: offset.top+53, left: offset.left, width: width}, 10, function(){ $(this).slideDown()});
           selected_input = $(this);
         }
-        
       });
 
-      $(document).click(function (e) {
-          if (!$(e.target).hasClass("dropdown") && $(e.target).parents("#as-dropdown").length === 0) 
-          {
-              $("#as-dropdown").slideUp();
-          }
-      });
-
-      $(document).on('change', '.as', function(){
-        let text = $(this).val();
-        if($(this).hasClass('new')){
-          let prev_box_id = $(this).parent('.alexa-row').prev().find('.box').attr('box_id');
-          store.dispatch(as_new_box(text, prev_box_id));
-        }else{
-          let box_id = parseInt($(this).attr('box_id'));
-          store.dispatch(as_box_edit(box_id, text));
-        }
-        $("#as-dropdown").slideUp();
-        // $(this).blur();
-      });
-
-      $(document).on('click', '#as-dropdown p', function(e){
+      $(document).on('click', '#as-select p', function(e){
 
         let box_id = $(this).attr('idx');
-        let prev_box_id = selected_input.parent('.alexa-row').prev().find('.box').attr('box_id');
+        let prev_box_id = selected_input.closest('.as-row').prev().find('.box').attr('box_id');
         store.dispatch(as_select(box_id, prev_box_id));
-        $("#as-dropdown").slideUp();
+        $("#as-select").remove();
 
       });
 
       $(document).click(function (e) {
-          if (!$(e.target).hasClass("dropdown") && $(e.target).parents("#as-dropdown").length === 0) 
+          if (!$(e.target).is("#as-select") && $(e.target).parents("#as-select").length === 0 && !$(e.target).hasClass("as-add-input")) 
           {
-              $("#as-dropdown").slideUp();
+              $("#as-select").remove();
           }
       });
+
+      $(document).on('click', '.as-box .remove_mark', function(e){
+      	
+	      	var r = confirm("Delete?");
+			if (r == true) {
+				let prev_box_id = $(this).closest('.as-row').prev().find('.box').attr('box_id');
+				let box_id = $(this).closest('.as-box').attr('box_id');
+				store.dispatch(as_box_delete(box_id, prev_box_id));
+			}
+      });
+
+      $(document).on('click', '.as-box.box', function(e){
+      	if(!$(e.target).hasClass("remove_mark") && !$(e.target).hasClass("as-box-edit")){
+      		let box_id = $(this).parent().attr('box_id');
+	        let old = $(this).find('p').text();
+	        $(this).find('div').html('<input type="text" class="as-box-edit" value="' + old + '">');
+      	}
+      });
+
+      $(document).on('change', '.as-box-edit', function(){
+        let text = $(this).val();
+        let box_id = $(this).closest('.as-box').attr('box_id');
+
+        store.dispatch(as_box_edit(text, box_id));
+      });
+
 
 
       /*******    AD    *******/
 
-      $(document).on('click', '.ad.main', function(){
-        if( $('#ad-dropdown').css('display') == 'none'){
-
-          $('.ad-item').remove();
-          $('.ad-new-input').remove();
+      $(document).on('click', '.ad-main', function(){
+        if( !$('#ad-main-select').length){
+          $(this).after('<div id="ad-main-select" class="bg-white p-1"><input class="ad-main-add py-0 px-1 w-100 mb-1" type="text" placeholder="Add New"></div>');
 
           let items = store.getState().ad.map(item => item.main);
-          let box_id = $(this).parent().attr('box_id');
-          let cases = box_id ? store.getState().boxes[box_id - 1].cases : [];
+          let box_id = $(this).closest('.ad-box').attr('box_id');
+          let cases = box_id ? getBox(store.getState().boxes, box_id).cases : [];
           let active = cases.map(item => item.content[0]);
           active = $.unique(active);
 
           $.each(items, function (index, item){
-            if(active.includes(item)){
-              $('.ad-new-btn').before('<div class="ad-item" idx="' + items.indexOf(item) + '">' +
-                                      '<input readonly="readonly" class="isflow" value="' + item + '">' + 
-                                    '</div>');
-            }else{
-              $('.ad-new-btn').before('<div class="ad-item" idx="' + items.indexOf(item) + '">' +
-                                      '<input readonly="readonly" value="' + item + '">' + 
-                                    '</div>');
-            }
-            
+          	let remove_mark = active.includes(item)?'<span class="remove_mark flex-shrink-1">×</span>': '';
+          	let item_class = active.includes(item)?' text-white bg2 ': '';
+            $('#ad-main-select').append('<p class="m-1 px-1 d-flex ' + item_class + '" idx="' + index + '"><span class="w-100 p-0">' + item + '</span>' + remove_mark + '</p>');
           });
 
-          let offset = $(this).offset();
-          let dropdown = $('#ad-dropdown');
-          let width = $('.alexa-box').width();
-          dropdown.animate({top: offset.top+53, left: offset.left, width: width/2}, 10, function(){ $(this).slideDown()});
           selected_input = $(this);
         }
         
       });
 
-      $(document).on('click', '.ad.sub', function(){
-        if( $('#sub-ad-dropdown').css('display') == 'none'){
+      $(document).click(function (e) {
+          if (!$(e.target).is("#ad-main-select") && $(e.target).parents("#ad-main-select").length === 0 && !$(e.target).next().is("#ad-main-select")) 
+          {
+              $("#ad-main-select").remove();
+          }
+      });
 
-          $('.sub-ad-item').remove();
-          $('.sub-ad-new-input').remove();
-
-          let items = store.getState().ad;
-          let box_id = $(this).parent().attr('box_id');
-          let main_idx = $(this).parent().find('.main').attr('idx');
-          let cases = box_id ? store.getState().boxes[box_id - 1].cases : [];
+      $(document).on('click', '.ad-sub', function(){
+        if( !$('#ad-sub-select').length){
+          let box_id = $(this).closest('.ad-box').attr('box_id');
+          let main_idx = $(this).closest('.ad-box').find('.main').attr('idx');
+          let cases = box_id ? getBox(store.getState().boxes, box_id).cases : [];
           let active = cases.map(item => item.content[1]);
           active = $.unique(active);
 
-          if($(this).parent().find('.main').attr('idx') + 1){
-            let items = store.getState().ad[$(this).parent().find('.main').attr('idx')].sub;
+          if($(this).closest('.ad-box').find('.ad-main').attr('idx') + 1){
+          	$(this).after('<div id="ad-sub-select" class="bg-white p-1"><input class="ad-sub-add py-0 px-1 mb-1 w-100" type="text" placeholder="Add New"></div>');
+            let items = store.getState().ad[$(this).closest('.ad-box').find('.ad-main').attr('idx')].sub;
 
             $.each(items, function (index, item){
-              
-              if(active.includes(item)){
-                $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + items.indexOf(item) + '">' +
-                                      '<input readonly="readonly" class="isflow" value="' + item + '">' + 
-                                    '</div>');
-              }else{
-                $('.sub-ad-new-btn').before('<div class="sub-ad-item" idx="' + items.indexOf(item) + '">' +
-                                      '<input readonly="readonly" value="' + item + '">' + 
-                                    '</div>');
-              }
+            	let remove_mark = active.includes(item)?'<span class="remove_mark float-right">×</span>': '';
+            	let item_class = active.includes(item)?' text-white bg2 ': '';
+            	$('#ad-sub-select').append('<p class="m-1 px-1 d-flex ' + item_class + '" idx="' + index + '"><span class="w-100">' + item + '</span>' + remove_mark + '</p>');
             });
 
-            let offset = $(this).offset();
-            let dropdown = $('#sub-ad-dropdown');
-            let width = $('.alexa-box').width();
-            dropdown.animate({top: offset.top+53, left: offset.left, width: width/2}, 10, function(){ $(this).slideDown()});
             selected_input = $(this);
           }
-          
         }
         
       });
 
-      $(document).on('click', '.ad-new-btn', function(){
-        if(!$('.ad-new-input').length){
-           $('#ad-dropdown').prepend('<input class="ad-new-input" type="text">');
-        }
-        
-        $('.ad-new-input').focus();
+      $(document).click(function (e) {
+          if (!$(e.target).is("#ad-sub-select") && $(e.target).parents("#ad-sub-select").length === 0 && !$(e.target).next().is("#ad-sub-select")) 
+          {
+              $("#ad-sub-select").remove();
+          }
       });
 
-      $(document).on('click', '.sub-ad-new-btn', function(){
-        if(!$('.sub-ad-new-input').length){
-           $('#sub-ad-dropdown').prepend('<input class="sub-ad-new-input" type="text">');
-        }
-        
-        $('.sub-ad-new-input').focus();
-      });
-
-      $(document).on('click', '#ad-dropdown .ad-item input', function(e){
-        if($(this).attr('readonly') == 'readonly'){
-          let prev_box_id = selected_input.parent().parent('.alexa-row').prev().find('.box').attr('box_id');
-          let box_id = selected_input.parent().attr('box_id');
-          let idx = $(this).parent().attr('idx');
-          $('#ad-dropdown').slideUp();
+      $(document).on('click', '#ad-main-select p', function(e){
+      	if(!$(e.target).hasClass("remove_mark")){
+          let prev_box_id = selected_input.closest('.as-row').prev().find('.box').attr('box_id');
+          let box_id = selected_input.closest('.ad-box').attr('box_id');
+          let idx = $(this).attr('idx');
+          $('#ad-main-select').remove();
 
           store.dispatch(ad_main_select(prev_box_id, box_id, idx));
-        }
+      	}
       });
 
-      $(document).on('click', '#sub-ad-dropdown .sub-ad-item input', function(e){
-        if($(this).attr('readonly') == 'readonly'){
-          let box_id = selected_input.parent().attr('box_id');
-          let idx = $(this).parent().attr('idx');
-          $("#sub-ad-dropdown").slideUp();
+      $(document).on('click', '#ad-sub-select p', function(e){
+      	if(!$(e.target).hasClass("remove_mark")){
+          let box_id = $(this).closest('.ad-box').attr('box_id');
+          let idx = $(this).attr('idx');
+          $("#ad-sub-select").remove();
 
           store.dispatch(ad_sub_select(box_id, idx));
-
         }
       });
 
-      $(document).on('change', '.ad-new-input', function(){
+      $(document).on('click', '#ad-main-select .remove_mark', function(e){
+      	let box_id = $(this).closest('.ad-box').attr('box_id');
+      	let main_id = $(this).closest('p').attr('idx');
+      	$("#ad-main-select").remove();
+
+      	store.dispatch(ad_main_delete(box_id, main_id));
+      })
+
+      $(document).on('click', '#ad-sub-select .remove_mark', function(e){
+      	let box_id = $(this).closest('.ad-box').attr('box_id');
+      	let main_id = $(this).closest('.ad-box').find('.ad-main').attr('idx');
+      	let sub_id = $(this).closest('p').attr('idx');
+      	$("#ad-sub-select").remove();
+
+      	store.dispatch(ad_sub_delete(box_id, main_id, sub_id));
+      })
+
+      $(document).on('change', '.ad-main-add', function(){
         let txt = $(this).val();
-        $('.dropdown').slideUp();
-
-        let prev_box_id = selected_input.parent().parent('.alexa-row').prev().find('.box').attr('box_id');
-
-        let box_id = selected_input.parent().attr('box_id');
+        let prev_box_id = $(this).closest('.as-row').prev().find('.box').attr('box_id');
+        let box_id = $(this).closest('.ad-box').attr('box_id');
         box_id = box_id ? box_id : 0 ;
 
         store.dispatch(ad_main_add(prev_box_id, box_id, txt));
       });
 
-      $(document).on('change', '.sub-ad-new-input', function(){
+      $(document).on('change', '.ad-sub-add', function(){
         let txt = $(this).val();
-        let main_idx = selected_input.parent().find('.main').attr('idx');
-        let box_id = selected_input.parent().attr('box_id');
-
-        $('.dropdown').slideUp();
+        let main_idx = $(this).closest('.ad-box').find('.ad-main').attr('idx');
+        let box_id = $(this).closest('.ad-box').attr('box_id');
 
         store.dispatch(ad_sub_add(box_id, txt, main_idx));
-      });
-
-      $(document).click(function (e) {
-          if (!$(e.target).hasClass("dropdown") && $(e.target).parents("#ad-dropdown").length === 0) 
-          {
-              $("#ad-dropdown").slideUp();
-          }
-      });
-
-      $(document).click(function (e) {
-          if (!$(e.target).hasClass("dropdown") && $(e.target).parents("#sub-ad-dropdown").length === 0) 
-          {
-              $("#sub-ad-dropdown").slideUp();
-          }
-      });
-
-      $(document).on('change', '.ad.sub', function(){
-
-        let main = $(this).parent().find('.main').attr('idx');
-        let sub = $(this).attr('idx');
-
-        if($(this).parent().hasClass('new')){
-          let prev_box_id = $(this).parent().parent('.alexa-row').prev().find('.box').attr('box_id');
-          store.dispatch(ad_new_box(main, sub, prev_box_id));
-        }else{
-          let box_id = parseInt($(this).parent().attr('box_id'));
-          store.dispatch(ad_box_edit(box_id, main, sub));
-        }
-      });
-
-      $(document).on('click', '.ad-new-btn', function(){
-        if(!$('.ad-new-input').length){
-           $('#ad-dropdown').prepend('<input class="ad-new-input" type="text">');
-        }
-        
-        $('.ad-new-input').focus();
       });
 
       /******   Common  ******/
       function newRow(id, action){
         let row = '';
-        let id_input = '<input class="row-id" type="text" value="' + id + '" disabled>';
-        let empty_input = '<div class="alexa-box"></div>';
-        let row_start = '<div class="alexa-row" rowid="' + id + '">';
-        let row_end = '</div>';
-        let hs_input = '<div class="hs-box new box"><button class="add-new">Add New</button></div>';
-        let as_input = '<input class="as alexa-box new box" type="text" value="" idx="0">';
-        let ad_input = '<div class="alexa-box new box" idx="0"><input  readonly="readonly" class="ad alexa-box main" type="text" value=""><input  readonly="readonly" class="ad alexa-box sub" type="text" value="" idx="0"></div>';
+        let empty_input = '<div class="w-30"></div>';
+        let row_start = '<div class="as-row d-flex py-2"><div class="w-5  text-center text-white">' + id + '</div><div class="w-95 d-flex justify-content-between">';
+        let row_end = '</div></div>';
+        let hs_input = '<div class="hs-box w-30"><input class="hs-add-input px-3 w-100" type="text" placeholder="Add New" /></div>';
+        let as_input = '<div class="as-box w-30 position-relative"><input class="as-add-input px-3 w-100" type="text" placeholder="Enter..." idx="0"></div>';
+        let ad_input = '<div class="ad-box w-30 d-flex" idx="0"><div class="w-50 px-1 position-relative"><input class="ad-main px-1 w-100" type="text" placeholder="Select Main" readonly></div><div class="w-50 px-1 position-relative"><input class="ad-sub px-1 w-100" type="text" idx="0" placeholder="Select Sub" readonly></div></div>';
         if(id == 1){
-          row = row_start + id_input + hs_input + as_input + ad_input + row_end;
+          row = row_start + hs_input + as_input + ad_input + row_end;
         }else{
           switch(action){
             case 'hs':
-              row = row_start + id_input + empty_input + as_input + ad_input + row_end;
+              row = row_start + empty_input + as_input + ad_input + row_end;
               break;
             case 'as':
-              row = row_start + id_input + hs_input + empty_input + ad_input + row_end;
+              row = row_start + hs_input + empty_input + ad_input + row_end;
               break;
             case 'ad':
-              row = row_start + id_input + hs_input + as_input + empty_input + row_end;
+              row = row_start + hs_input + as_input + empty_input + row_end;
               break;
           }
         }
@@ -1124,8 +1043,8 @@
         let row_id = 1;
         let box_id = 1;
         let action = '';
-        while(box_id){
-          let box = boxes[box_id - 1];
+        while(getBox(boxes, box_id)){
+          let box = getBox(boxes, box_id);
           action = box.action;
 
           if(action == 'hs'){
@@ -1159,10 +1078,9 @@
       function createRow(row_id, box_id, box, action, text){
 
         let row = '';
-        let id_input = '<input class="row-id" type="text" value="' + row_id + '" disabled>';
-        let empty_input = '<div class="alexa-box"></div>';
-        let row_start = '<div class="alexa-row" rowid="' + row_id + '">';
-        let row_end = '</div>';
+        let empty_input = '<div class="w-30"></div>';
+        let row_start = '<div class="as-row d-flex py-2"><div class="w-5  text-center text-white">' + row_id + '</div><div class="w-95 d-flex justify-content-between">';
+        let row_end = '</div></div>';
         switch(action){
           case 'hs':
             let items = box.cases;
@@ -1170,36 +1088,36 @@
             let hs_box = '';
 
             $.each(items, function (index, item){
-              if(index == box.active){
-                hs_box = hs_box + '<input type="text" class="active" idx="' + items.indexOf(item) + '" value="' + item.content + '">';
-              }else{
-                hs_box = hs_box + '<input type="text" idx="' + items.indexOf(item) + '" value="' + item.content + '">';
-              }
-              
+
+            	let active = index == box.active ? "active" : "";
+                hs_box = hs_box + '<div class="hs-case text-white px-3 py-1 my-1 d-flex ' + active + '" idx="' + index + '"><p class="w-100 m-0 pr-3">' + item.content + '</p><span class="remove_mark flex-shrink-1">×</span></div>';
+
             });
-            hs_box = '<div class="hs-box box" box_id="' + box_id + '" content="' + text + '" idx="0">' +
-             hs_box + '<button class="add-new">Add New</button></div>';
-            row = row_start + id_input + hs_box + empty_input + empty_input + row_end;
+            hs_box = '<div class="hs-box box w-30 " box_id="' + box_id + '" idx="0">' +
+            hs_box + '<input class="hs-add-input w-100 px-3" type="text" placeholder="Add New" /></div>';
+            row = row_start + hs_box + empty_input + empty_input + row_end;
             break;
           case 'as':
-            row = row_start + id_input + empty_input + '<input class="as alexa-box box" type="text" value="' + text + '" box_id="' + box_id + '"  idx="0">' + empty_input + row_end;
+            row = row_start + empty_input + '<div class="as-box box w-30 " box_id="' + box_id + '"  idx="0"><div class="text-white bg1 px-3 py-1 d-flex"><p class="w-100 m-0 pr-3">' + text + '</p><span class="remove_mark flex-shrink-1">×</span></div></div>' + empty_input + row_end;
             break;
           case 'ad':
             let ad = store.getState().ad;
             let maintext = text[0];
             let subtext = text[1];
-            // if(ad[box.active.main].sub.length){
-            //   subtext = ad[box.active.main].sub[box.active.sub];
-            // }else{
-            //   subtext = '';
-            // }
-            row = row_start + id_input + empty_input + empty_input + '<div class="alexa-box box" idx="0" ' + '" box_id="' + box_id + '"><input readonly="readonly"  class="ad alexa-box main" type="text" value="' + maintext + '"  idx="' + box.active.main + '"><input readonly="readonly"  class="ad alexa-box sub" type="text" value="' + subtext + '" idx="' + box.active.sub + '"></div>' + row_end;
+
+            row = row_start + empty_input + empty_input + '<div class="ad-box box w-30 d-flex" idx="0" box_id="' + box_id + '"><div class="w-50 px-2 position-relative"><input class="ad-main text-white bg1 py-1 px-1 w-100 mr-1 border-0" type="text" readonly="" value="' + maintext + '" idx=' + box.active.main + '></div><div class="w-50 px-1 position-relative"><input class="ad-sub py-1 px-1 w-100 mr-1 text-white bg1 border-0 " type="text" idx="0"  readonly="" value="' + subtext + '" idx="' + box.active.sub + '"></div></div>' + row_end;
             break;
         }
         $('.alexa-section').append(row);
       }
 
-    });
+      function getBox(array, val) {
+		    for (var i in array) {
+		        if(array[i].id == val) return array[i];
+		    }
+		}
+	});
+
   </script>
 
 </body>
